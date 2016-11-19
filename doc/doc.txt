@@ -1,0 +1,45 @@
+so, how will this work :
+
+The thing is started, then : 
+
+    Loads the main frame, where stuff will be displayed.
+
+    Begins loading all the data, decodes it, optionally says something failed.
+
+    If everything up to that point is succesful, it shows the login screen, for storing progress. ( similar to choosing your profile from a game. ).
+
+    Then, it displays the menu, with highlights as to what has already been done.
+
+
+
+What there is to do is to read through the info and then do tests.
+
+The type of loaded info is :
+
+-Audio Files for listening to.
+-Pictures for a fancier UI or pictures about the subject of the lesson
+
+-Information about:
+    1. The Author
+    2. The Literal Current
+    3. The Actual Opera
+
+-Exercises of type:
+    1. Drag and drop D##D
+    2. True or False T##F
+    3. Sort the pieces S##P
+    4. Complete with the right element C##E
+
+-------------
+===
+==
+=
+How will this be done ? 
+1. The profiles will be stored locally, in C:\Profile.
+2. The stored data will have a certain directory structure with settings, making the frames adaptable. For example, in the "Tests" directory, there are multiple problems to solve, which can be initial ( are done before reading ) and normal ( done when one wants to ). There can also be a order in which the problems can be solved. Problems with the same order number are put together in the same "test". 
+3. All the pictures will be stored in a "pics" folder, with a certain name, so that they can be inserted in parts of the lesson.
+4. Same goes for the audio files. Just that they are also put inside the "gallery", to be listened to at the user's desire.
+
+
+
+So, for now, start the app and load everything into itself.
