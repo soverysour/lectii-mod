@@ -4,34 +4,32 @@ import scala.io.Source
 import java.io.File
 
 object Loader {
-    private[this] var users: Map[String, (String, String)] = Map[String, (String, String)]()
+    private[this] var users: Map[String, (String, Int)] = Map[String, (String, Int)]()
     private[this] var settings: Map[String, String] = Map[String, String]()
     private[this] var info: Set[Lectura] = Set[Lectura]()
     private[this] var tests: Set[Test] = Set[Test]()
 
     def init: Unit = {
-        val path = System.getProperty("user.home") + "\\Draconis"
+        val path = System.getProperty("user.home") + "\\Draconis\\"
 
-        val recordings = Source.fromFile(path+"\\list.txt").getLines.toIndexedSeq
+        val recordings = Source.fromFile(path+"list.txt").getLines.toIndexedSeq
         recordings.foreach( x => {
-            users += ( x.split("[@]")(0) -> (x.split("[@]")(1), x.split("[@]")(2)) )
+            users += ( x.split("[@]")(0) -> (x.split("[@]")(1), x.split("[@]")(2).toInt) )
         })
 
-        val sets = Source.fromFile(path+"\\set.txt").getLines.toIndexedSeq
+        val sets = Source.fromFile(path+"set.txt").getLines.toIndexedSeq
         sets.foreach( x => settings += ( x.split("=")(0) -> x.split("=")(1) ))
 
-        val files = new File(path+"\\material").listFiles.map(_.getName)
+        val files = new File(path+"material").listFiles.map(_.getName)
         files.foreach( x => {
-            info += new Lectura(Source.fromFile(path+"\\material\\"+x).getLines.toIndexedSeq)
+            info += new Lectura(Source.fromFile(path+"material\\"+x).getLines.toIndexedSeq)
         })
 
 
-        val testPaths = new File(path+"\\test").listFiles.map(_.getName)
+        val testPaths = new File(path+"test").listFiles.map(_.getName)
         testPaths.foreach( x => {
-            tests += new Test(Source.fromFile(path+"\\test\\"+x).getLines.toIndexedSeq)
+            tests += new Test(Source.fromFile(path+"test\\"+x).getLines.toIndexedSeq)
         })
-
-        info foreach println
     }
 
     class Test(sourceTest: IndexedSeq[String]){
@@ -57,6 +55,16 @@ object Loader {
         val info = accumulator
     }
 
-    def getSet(arg: String): String = settings(arg)
+    def getInfo: Set[Lectura] = info
+    def getTests: Set[Test] = tests
+    def getSettings(arg: String): String = settings(arg)
+    def getUsers(arg: String): (String, Int) = {
+        try { users(arg) }
+        catch { case _: Throwable => ("", -1) }
+    }
+
+    def register(name: String, pass: String): Unit = {
+        users += (name -> (pass, 1))
+    }
     
 }
