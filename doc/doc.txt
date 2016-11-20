@@ -5,10 +5,10 @@ When it starts, you are asked to log in or to make an account. This is so it can
 Then, the main frame appears, where you can choose from the "Written Material" section, from the "Tests" section, or from the "Gallery" section, where pictures, audio and even video might be found.
 Material from "Written Material" and "Tests" may require a certain level of progress tied to the account.
 
+****Make the login / register frame with interaction and all that.
 
 So, what to do now, since all the loading has been done...
 
--Make the login / register frame with interaction and all that.
 -Make the main frame, able to function properly after logging in.
 -Add options to go to the Materials Area, to the Tests Area and to the Gallery.
 -Make it so that Material is displayed properly.

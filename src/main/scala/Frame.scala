@@ -3,7 +3,8 @@ import scala.swing._
 object Frame {
 
     var login: loginFrame = null
-    var level = -1
+    var mainFrame: principalFrame = null
+    var (user, level) = ("", -1)
 
     def main(args: Array[String]): Unit = {
         Loader.init
@@ -12,22 +13,34 @@ object Frame {
 
     def commence: Unit = {
         login.close
-        
+        mainFrame = new principalFrame
     }
 
     private[this] def restrictHeight(s: Component): Unit = {
         s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
     }
 
+    class principalFrame extends MainFrame {
+        title = Loader.getSettings("titlu")
+        preferredSize = new Dimension(640, 480)
+        resizable = false
+
+        
+
+        centerOnScreen
+        visible = true
+    }
+
     class loginFrame extends MainFrame {
+        title = "Login or Register"
+        preferredSize = new Dimension(280, 150)
+        resizable = false
+
         val usernameField = new TextField
         val passwordField = new PasswordField
         restrictHeight(usernameField)
         restrictHeight(passwordField)
-
-        title = "Login or Register"
-        preferredSize = new Dimension(280, 150)
-        resizable = true
+        
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
                 contents += new Label( "Username" )
@@ -44,10 +57,11 @@ object Frame {
             contents += new BoxPanel( Orientation.Horizontal ){
                 contents += Button( "Login" ) { login(usernameField.text, passwordField.password.mkString) }
                 contents += Swing.HGlue
-                contents += Button("Register"){register(usernameField.text, passwordField.password.mkString)}
+                contents += Button("Register"){ register(usernameField.text, passwordField.password.mkString) }
             }
             border = Swing.EmptyBorder(10, 10, 10, 10)
         }
+        centerOnScreen
         visible = true
         
         private[this] def login(name: String, pass: String): Unit = {
@@ -55,8 +69,12 @@ object Frame {
                 if ( Loader.getUsers(name) == ("", -1) )
                     Dialog.showMessage(contents.head, "User does not exist.", title="Authentication Error")
                 else {
-                    level = Loader.getUsers(name)._2
-                    commence
+                    if ( pass == Loader.getUsers(name)._1 ){
+                        user = name
+                        level = Loader.getUsers(name)._2
+                        commence
+                    }
+                    else Dialog.showMessage(contents.head, "Incorrect password.", title="Authentication Error")
                 }
             }
         }
@@ -80,6 +98,5 @@ object Frame {
             else true 
         }
     }
-
 
 }

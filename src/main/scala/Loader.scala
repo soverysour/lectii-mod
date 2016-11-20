@@ -1,7 +1,7 @@
 import scala.swing._
 import scala.collection.mutable.{Map, Set}
 import scala.io.Source
-import java.io.File
+import java.io.{File, FileWriter}
 
 object Loader {
     private[this] var users: Map[String, (String, Int)] = Map[String, (String, Int)]()
@@ -12,10 +12,11 @@ object Loader {
     def init: Unit = {
         val path = System.getProperty("user.home") + "\\Draconis\\"
 
-        val recordings = Source.fromFile(path+"list.txt").getLines.toIndexedSeq
-        recordings.foreach( x => {
+        val profiles = Source.fromFile(path+"list.txt")
+        profiles.getLines.toIndexedSeq.foreach( x => {
             users += ( x.split("[@]")(0) -> (x.split("[@]")(1), x.split("[@]")(2).toInt) )
         })
+        profiles.close
 
         val sets = Source.fromFile(path+"set.txt").getLines.toIndexedSeq
         sets.foreach( x => settings += ( x.split("=")(0) -> x.split("=")(1) ))
@@ -24,7 +25,6 @@ object Loader {
         files.foreach( x => {
             info += new Lectura(Source.fromFile(path+"material\\"+x).getLines.toIndexedSeq)
         })
-
 
         val testPaths = new File(path+"test").listFiles.map(_.getName)
         testPaths.foreach( x => {
@@ -65,6 +65,9 @@ object Loader {
 
     def register(name: String, pass: String): Unit = {
         users += (name -> (pass, 1))
+        val fw = new FileWriter(System.getProperty("user.home") + "\\Draconis\\list.txt", true)
+        try { fw.write("\n" + name + "@" + pass + "@" + 1) }
+        finally fw.close
     }
     
 }
