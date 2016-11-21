@@ -25,7 +25,7 @@ object Frame {
         preferredSize = new Dimension(640, 480)
         resizable = false
 
-        
+        contents = new BoxPanel( Orientation.Vertical ){}
 
         centerOnScreen
         visible = true
