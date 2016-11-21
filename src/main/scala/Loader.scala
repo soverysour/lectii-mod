@@ -47,12 +47,9 @@ object Loader {
         val level = sourceTest(0).toInt
     }
     class Lectura(sourceTest: IndexedSeq[String]){
-        var accumulator = ""
-        for ( x <- 2 until sourceTest.size ) accumulator = accumulator + sourceTest(x) + "\n" 
-        
         val title = sourceTest(0)
         val level = sourceTest(1).toInt
-        val info = accumulator
+        val info = (for ( x <- 2 until sourceTest.size ) yield sourceTest(x) + "\n" ).mkString
     }
 
     def getInfo: Set[Lectura] = info
