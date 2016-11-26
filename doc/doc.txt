@@ -12,4 +12,29 @@ So, what to do now, since all the loading has been done...
 -Make the main frame, able to function properly after logging in.
 -Add options to go to the Materials Area, to the Tests Area and to the Gallery.
 -Make it so that Material is displayed properly.
--
+
+
+
+The types of problems that will exist are : 
+-Choose the correct variant. C##V
+-Drag and drop. D##D
+-Complete the empty line. C##E
+
+--------------
+
+New TODO: 
+
+Change the way everything so far works, providing small code revamps
+The proper loading of the types of problems from the tests.
+The proper registration for the teachers.
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+-Do checks so the data in the setari.txt file doesn't allow for the user to have {  token.
+
+How a block inside the setari.txt file, of a test or a material should look:
+
+Material = 
+
+[name.txt] { ["mat"|"tes"], ["titlu"], [nivel]
+
