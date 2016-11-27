@@ -73,6 +73,7 @@ object Loader {
     class Lectura(sourceTest: IndexedSeq[String], val name: String, val level: Int){
         val info = (for ( x <- 0 until sourceTest.size ) yield sourceTest(x) + "\n" ).mkString
     }
+    
     class Elev(val parola: String, val nume: String, val prenume: String, val scoala: String, val clasa: String, val nivel: Int){}
     class Profesor(val parola: String, val nume: String, val prenume: String, val scoala: String, val disciplina: String){}
 

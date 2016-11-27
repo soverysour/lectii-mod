@@ -6,20 +6,28 @@ object Frame {
     var loginFr: loginFrame = null
     var mainFrame: principalFrame = null
     var accountFrame: registerFrame = null
+
     var currentUser: String = ""
+    val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
     def main(args: Array[String]): Unit = {
         Loader.init
         loginFr = new loginFrame
     }
 
-    def commence: Unit = {
+    private[this] def commence: Unit = {
         loginFr.close
         mainFrame = new principalFrame
     }
 
     private[this] def restrictHeight(s: Component): Unit = {
         s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
+    }
+
+    private[this] def getPas: String = {
+        val alfa = "XDvC"
+        val beta = alfa + "SS"
+        beta + alfa.reverse
     }
 
     class principalFrame extends MainFrame {
@@ -49,7 +57,9 @@ object Frame {
         val statprof = new RadioButton("Profesor")
         val status = new ButtonGroup(statelev, statprof)
         val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
-        val quit = Button("Inapoi"){close; loginFr.visible = true}
+        val quit = Button("Inapoi"){ back }
+        val special = new PasswordField
+        special.editable = false
 
         restrictHeight(username)
         restrictHeight(password)
@@ -101,6 +111,8 @@ object Frame {
             contents == Swing.VStrut(5)
             contents += opttext
             contents += Swing.VStrut(5)
+            contents += special
+            contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
                 contents += quit
                 contents += Swing.HGlue
@@ -117,8 +129,8 @@ object Frame {
         reactions += {
             case ButtonClicked(button) => {
                 button.text match {
-                    case "Elev" => optional.text = "Clasa"
-                    case "Profesor" => optional.text = "Disciplina"
+                    case "Elev" => {optional.text = "Clasa"; special.peer.setText(""); special.editable = false}
+                    case "Profesor" => {optional.text = "Disciplina"; special.editable = true}
                 }
             }
         }
@@ -128,21 +140,30 @@ object Frame {
 
         private[this] def register(username: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
             if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
-                if ( statelev ) Loader.registerElev(username, pass, nume, prenume, scoala, opttext)
-                else Loader.registerProf(username, pass, nume, prenume, scoala, opttext)
-                close
-                loginFr.visible = true
+                if ( Loader.getLog(username) == "" ){
+                    if ( statelev ){
+                        Loader.registerElev(username, pass, nume, prenume, scoala, opttext)
+                        back
+                    }
+                    else if ( special.password.mkString == lid ){
+                        Loader.registerProf(username, pass, nume, prenume, scoala, opttext)
+                        back
+                    }
+                    else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
+                }
+                else Dialog.showMessage(contents.head, "User already exists.", title = "Input Error")
             }
+            else Dialog.showMessage(contents.head, "Invalid input data.", title = "Input Error")
         }
         
         private[this] def good(arg: List[String]): Boolean = {
-            for ( x <- arg ){
-                if ( x == "" || x.replaceAll("[^a-zA-Z0-9]", "") != x ){
-                    Dialog.showMessage(contents.head, "Invalid input data", title = "Input Error")
-                    return false
-                }
-            }
+            for ( x <- arg )
+                if ( x == "" || x.replaceAll("[^a-zA-Z0-9]", "") != x ) return false
             true
+        }
+        private[this] def back: Unit = {
+            close
+            loginFr.visible = true
         }
     }
 
