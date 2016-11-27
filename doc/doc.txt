@@ -2,39 +2,50 @@ So, what is all this :
 
 When it starts, you are asked to log in or to make an account. This is so it can track your progress and tie it to a certain identity.
 
-Then, the main frame appears, where you can choose from the "Written Material" section, from the "Tests" section, or from the "Gallery" section, where pictures, audio and even video might be found.
+Then, the main frame appears, where you can choose from the "Written Material" section, from the "Tests" section, or from the "Gallery" section, where pictures, audio / video files might be found.
 Material from "Written Material" and "Tests" may require a certain level of progress tied to the account.
 
-****Make the login / register frame with interaction and all that.
+Teachers, on the other hand, directly create and set as ready materials, media and tests, set up the settings, and see the progress and scores of the list of users. A static, unique token is required to create a teacher account.
 
+Besides, every instance has a [socket] listening for data / requests which can be sent only by devices with an admin level account in use.
+
+----------------------------------------------------------
 So, what to do now, since all the loading has been done...
 
--Make the main frame, able to function properly after logging in.
--Add options to go to the Materials Area, to the Tests Area and to the Gallery.
--Make it so that Material is displayed properly.
-
-
-
-The types of problems that will exist are : 
--Choose the correct variant. C##V
--Drag and drop. D##D
--Complete the empty line. C##E
-
---------------
-
-New TODO: 
-
-Change the way everything so far works, providing small code revamps
-The proper loading of the types of problems from the tests.
-The proper registration for the teachers.
+-Make the main frame.
+-Make the material, tests and profile sections.
+-Make the gallery section.
+-Make the progress saving for each user.
+-Make all the data encryption.
+-Make the network part of the app.
 
 \\\\\\\\\\\\\\\\\\\\\\\\\\
 
--Do checks so the data in the setari.txt file doesn't allow for the user to have {  token.
+-Do checks so the data that the teacher inputs when creating a new lesson doesn't contain weird symbols in weird spots.
+-I think that, for the sake of transmitting this across a network, the only elements inside a gallery will be pictures and just maybe audio only files.
+-There definitely should be default media files, so that the app can look better.
+-Most likely, a large revamp awaits.
 
-How a block inside the setari.txt file, of a test or a material should look:
+A lesson is a folder which contains: 
+    -The folder for tests.
+    -The folder for materials.
+    -The folder for gallery.
+    -The settings file.
 
-Material = 
+A teacher makes/initiates:
+    -A new material by specifying its title, level, and contents.
+    -A test by specifying its title, level, and title, content and points for each exercise to solve.
+    -A gallery file by specifying a title and a file with the help of a FileChooser.
+    -Settings for a said module, such as title.
+    -A transmission of data by either sending a whole new lesson (module) or specifying bits to add / replace in a pre-existent module. 
 
-[name.txt] { ["mat"|"tes"], ["titlu"], [nivel]
+The available actions for a teacher are:
+    -Add test, material, gallery entry;
+    -Remove test, material, gallery entry. 
+    -Change global project settings. 
+    -Request statistics about the users and their progress.
 
+The types of problems that will exist are : 
+    -Choose the correct variant. C##V
+    -Drag and drop. D##D
+    -Complete the empty line. C##E

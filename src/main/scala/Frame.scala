@@ -1,5 +1,7 @@
 import scala.swing._
 import scala.swing.event._
+import java.awt.Color
+import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 
 object Frame {
 
@@ -20,9 +22,7 @@ object Frame {
         mainFrame = new principalFrame
     }
 
-    private[this] def restrictHeight(s: Component): Unit = {
-        s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
-    }
+    private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
 
     private[this] def getPas: String = {
         val alfa = "XDvC"
@@ -35,7 +35,9 @@ object Frame {
         preferredSize = new Dimension(640, 480)
         resizable = false
 
-        contents = new BoxPanel( Orientation.Vertical ){}
+        contents = new BoxPanel( Orientation.Vertical ){
+            background = Color.gray
+        }
 
         centerOnScreen
         visible = true
@@ -59,15 +61,10 @@ object Frame {
         val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
         val quit = Button("Inapoi"){ back }
         val special = new PasswordField
-        special.editable = false
 
-        restrictHeight(username)
-        restrictHeight(password)
-        restrictHeight(nume)
-        restrictHeight(prenume)
-        restrictHeight(scoala)
-        restrictHeight(opttext)
+        restrictHeight(username); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
         statelev.selected = true
+        special.editable = false
 
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
@@ -129,8 +126,8 @@ object Frame {
         reactions += {
             case ButtonClicked(button) => {
                 button.text match {
-                    case "Elev" => {optional.text = "Clasa"; special.peer.setText(""); special.editable = false}
-                    case "Profesor" => {optional.text = "Disciplina"; special.editable = true}
+                    case "Elev" => {optional.text = "Clasa"; special.peer.setText(""); special.editable = false; opttext.text = ""}
+                    case "Profesor" => {optional.text = "Disciplina"; special.editable = true; opttext.text = ""}
                 }
             }
         }
@@ -165,6 +162,8 @@ object Frame {
             close
             loginFr.visible = true
         }
+        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+        override def closeOperation = {loginFr.visible = true; close}
     }
 
     class loginFrame extends MainFrame {
