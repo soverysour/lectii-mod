@@ -12,7 +12,8 @@ Besides, every instance has a [socket] listening for data / requests which can b
 ----------------------------------------------------------
 So, what to do now, since all the loading has been done...
 
--Add the "Select lesson" frame.
+#Add the "Select lesson" frame.
+
 -Add the main students' frame.
 -Add the material section, with loaded materials.
 -Add the tests section, with all the tests.
@@ -56,3 +57,10 @@ The types of problems that will exist are :
     -Choose the correct variant. C##V
     -Drag and drop. D##D
     -Complete the empty line. C##E
+
+
+
+
+THIS DOCUMENTATION IS REALLY AMBIGUOUS. KEEP EVERYTHING IN MIND AND CHANGE AS NECESSARY.
+
+For now, finish everything that is related to the students, absolutely everything. Afterwards, optimise, change, improve and THEN switch to everything about the teachers.

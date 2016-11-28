@@ -2,15 +2,18 @@ import scala.swing._
 import scala.swing.event._
 import java.awt.Color
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+import scala.collection.mutable.Set
 
 object Frame {
-    var loginFr: loginFrame = null
-    var accountFrame: registerFrame = null
+    private[this] var loginFr: loginFrame = null
+    private[this] var accountFrame: registerFrame = null
 
-    var elevFr: studFrame = null
-    var profFr: teacFrame = null
+    private[this] var elevFr: studFrame = null
+    private[this] var starFr: elevFrame = null
 
-    val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
+    private[this] var profFr: teacFrame = null
+
+    private[this] val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
     //Load the login frame and initiate the loading of the users and their credentials.
     def main(args: Array[String]): Unit = {
@@ -28,15 +31,32 @@ object Frame {
     //The frame a student account sees after picking the module.
     class studFrame extends MainFrame {
         title = "Choose your module"
-        preferredSize = new Dimension(200, 120)
         resizable = false
+        private[this] var asdf: Set[Button] = Set[Button]()
+
+        Loader.getModules.foreach( x => {asdf += Button(x){ sweep(x) }} )
+        asdf foreach restrictHeight
 
         contents = new BoxPanel( Orientation.Vertical ){
-            background = Color.gray
+            asdf.foreach( x => {
+                contents += x
+                contents += Swing.VStrut(10)
+            })
+            border = Swing.EmptyBorder(15, 15, 5, 15)
         }
 
+        private[this] def sweep(a: String): Unit = {
+            close
+            starFr = new elevFrame(a)
+        }
+
+        peer.pack
         centerOnScreen
         visible = true
+    }
+
+    class elevFrame(a: String) extends MainFrame {
+        Loader.load(a)
     }
 
     //Teacher's frame.
@@ -45,7 +65,7 @@ object Frame {
         preferredSize = new Dimension(800, 600)
         resizable = false
 
-        
+
 
         centerOnScreen
         visible = true
@@ -57,19 +77,19 @@ object Frame {
         preferredSize = new Dimension(220, 290)
         resizable = false
 
-        val username = new TextField
-        val password = new PasswordField
-        val nume = new TextField
-        val prenume = new TextField
-        val scoala = new TextField
-        val optional = new Label("Clasa")
-        val opttext = new TextField
-        val statelev = new RadioButton("Elev")
-        val statprof = new RadioButton("Profesor")
-        val status = new ButtonGroup(statelev, statprof)
-        val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
-        val quit = Button("Inapoi"){ back }
-        val special = new PasswordField
+        private[this] val username = new TextField
+        private[this] val password = new PasswordField
+        private[this] val nume = new TextField
+        private[this] val prenume = new TextField
+        private[this] val scoala = new TextField
+        private[this] val optional = new Label("Clasa")
+        private[this] val opttext = new TextField
+        private[this] val statelev = new RadioButton("Elev")
+        private[this] val statprof = new RadioButton("Profesor")
+        private[this] val status = new ButtonGroup(statelev, statprof)
+        private[this] val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
+        private[this] val quit = Button("Inapoi"){ back }
+        private[this] val special = new PasswordField
 
         restrictHeight(username); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
         statelev.selected = true
@@ -171,8 +191,7 @@ object Frame {
         }
         
         private[this] def good(arg: List[String]): Boolean = {
-            for ( x <- arg )
-                if ( x == "" || x.replaceAll("[^a-zA-Z0-9]", "") != x ) return false
+            for ( x <- arg ) if ( x == "" || x.replaceAll("[^a-zA-Z0-9]", "") != x ) return false
             true
         }
         private[this] def back: Unit = {
@@ -180,7 +199,7 @@ object Frame {
             loginFr.visible = true
         }
         peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
-        override def closeOperation = {loginFr.visible = true; close}
+        override def closeOperation = { back }
     }
 
     //The login frame.
@@ -189,8 +208,8 @@ object Frame {
         preferredSize = new Dimension(280, 150)
         resizable = false
 
-        val usernameField = new TextField
-        val passwordField = new PasswordField
+        private[this] val usernameField = new TextField
+        private[this] val passwordField = new PasswordField
         restrictHeight(usernameField)
         restrictHeight(passwordField)
         
