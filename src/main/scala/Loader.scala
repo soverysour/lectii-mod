@@ -1,62 +1,46 @@
-import scala.swing._
 import scala.collection.mutable.{Map, Set}
 import scala.io.Source
-import java.io.{File, FileWriter}
+import java.io.FileWriter
 
 object Loader {
-    private[this] var elevi: Map[String, Elev] = Map[String, Elev]()
-    private[this] var profesori: Map[String, Profesor] = Map[String, Profesor]()
-    private[this] var utilizatori: Map[String, String] = Map[String, String]()
+    private[this] var users: Map[String, Cont] = Map[String, Cont]()
+    private[this] var currentUser: Cont = null
+
     private[this] var settings: Map[String, String] = Map[String, String]()
     private[this] var info: Set[Lectura] = Set[Lectura]()
     private[this] var tests: Set[Test] = Set[Test]()
 
+    //Load all the profiles into the users map. This is always done regardless of chosen Module.
     def init: Unit = {
-        val path = System.getProperty("user.home") + "\\Draconis\\"
-
-        val profiles = Source.fromFile(path+"users.txt")
+        val profiles = Source.fromFile(System.getProperty("user.home")+"\\Draconis\\users.txt")
         profiles.getLines.toIndexedSeq.foreach( x => {
-            if ( x.contains("[") ){
-                val name = x.split("\\[")(0)
-                val right = x.split("\\[")(1).split("[,]")
-                profesori += (name -> new Profesor(right(0), right(1), right(2), right(3), right(4)))
-            }
-            else {
-                val name = x.split("\\{")(0)
-                val right = x.split("\\{")(1).split("[,]")
-                elevi += (name -> new Elev(right(0),right(1),right(2),right(3),right(4),right(5).toInt))
-            }
+            val e = x.split("[,]")
+            users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6)))
         })
         profiles.close
-
-        val sets = Source.fromFile(path+"setari.txt")
-        sets.getLines.toIndexedSeq.foreach( x => {
-            if ( x.contains("{") ){
-                val file = x.split("[{]")(0)
-                val right = x.split("[{]")(1).split("[,]")
-                val isMat = right(0) == "mat"
-                val name = right(1)
-                val level = right(2).toInt
-
-                if ( isMat ) {
-                    val content = Source.fromFile(path+"material\\"+file)
-                    info += new Lectura(content.getLines.toIndexedSeq, name, level)
-                    content.close
-                }
-                else {
-                    val content = Source.fromFile(path+"test\\"+file)
-                    tests += new Test(content.getLines.toIndexedSeq, name, level)
-                    content.close
-                }
-            }
-            else settings += ( x.split("=")(0) -> x.split("=")(1) )
-        })
-        sets.close
-
-        for ( (k,v) <- elevi ) utilizatori += ( k -> v.parola)
-        for ( (k,v) <- profesori ) utilizatori += ( k -> v.parola)
     }
 
+    //Get value of a setting inside a module or the password for a user (independent of module).
+    def getSettings(arg: String): String = settings(arg)
+    def getLog(arg: String): String = {
+        try { users(arg).parola }
+        catch { case _: Throwable => "" }
+    }
+    def setUser(arg: String): Unit = { currentUser = users(arg) }
+    def getUser: Cont = currentUser
+
+    //Register a new account by adding it to the users map and writing it to the users.txt.
+    def register(us: String, pa: String, nu: String, pr: String, sc: String, opt: String, isElev: Boolean): Unit = {
+        var sp = if ( isElev ) "e" else "p"
+
+        users += (us -> new Cont(us, pa, nu, pr, sc, opt, sp) )
+
+        val fw = new FileWriter(System.getProperty("user.home") + "\\Draconis\\users.txt", true)
+        try { fw.write("\n" + us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp) }
+        finally fw.close
+    }
+
+    //Data type for holding tests, their content and their settings.
     class Test(sourceTest: IndexedSeq[String], val name: String, val level: Int){
         class Exercitiu(val tip: String, val ex: Set[String]){}
         private[this] var subiect = Set[Exercitiu]()
@@ -70,34 +54,13 @@ object Loader {
 
         val problems = subiect
     }
+
+    //Data type for holding materials, their content and settings.
     class Lectura(sourceTest: IndexedSeq[String], val name: String, val level: Int){
         val info = (for ( x <- 0 until sourceTest.size ) yield sourceTest(x) + "\n" ).mkString
     }
-    
-    class Elev(val parola: String, val nume: String, val prenume: String, val scoala: String, val clasa: String, val nivel: Int){}
-    class Profesor(val parola: String, val nume: String, val prenume: String, val scoala: String, val disciplina: String){}
 
-    def getInfo: Set[Lectura] = info
-    def getTests: Set[Test] = tests
-    def getSettings(arg: String): String = settings(arg)
-    def getLog(arg: String): String = {
-        try { utilizatori(arg) }
-        catch { case _: Throwable => "" }
-    }
-
-    def registerElev(username: String, pass: String, nume: String, prenume: String, scoala: String, clasa: String): Unit = {
-        elevi += ( username -> new Elev(pass, nume, prenume, scoala, clasa, 1))
-        utilizatori += ( username -> pass )
-        val fw = new FileWriter(System.getProperty("user.home") + "\\Draconis\\users.txt", true)
-        try { fw.write("\n" + username + "{" + pass +","+ nume +","+ prenume +","+ scoala +","+ clasa +","+ 1) }
-        finally fw.close
-    }
-    def registerProf(username: String, pass: String, nume: String, prenume: String, scoala: String, disciplina: String): Unit = {
-        profesori += ( username -> new Profesor(pass, nume, prenume, scoala, disciplina) )
-        utilizatori += ( username -> pass )
-        val fw = new FileWriter(System.getProperty("user.home") + "\\Draconis\\users.txt", true)
-        try { fw.write("\n" + username + "[" + pass +","+ nume +","+ prenume +","+ scoala +","+ disciplina) }
-        finally fw.close
-    }
+    //Data type that holds both students and admin level account details.
+    class Cont(val username: String, val parola: String, val nume: String, val prenume: String, val scoala: String, val opttext: String, val elev: String){ val isElev = elev == "e" }
     
 }

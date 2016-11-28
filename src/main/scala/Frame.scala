@@ -4,35 +4,31 @@ import java.awt.Color
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 
 object Frame {
-
     var loginFr: loginFrame = null
-    var mainFrame: principalFrame = null
     var accountFrame: registerFrame = null
 
-    var currentUser: String = ""
+    var elevFr: studFrame = null
+    var profFr: teacFrame = null
+
     val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
+    //Load the login frame and initiate the loading of the users and their credentials.
     def main(args: Array[String]): Unit = {
         Loader.init
         loginFr = new loginFrame
     }
 
+    //This is what happens when someone succesfully logs in. 
     private[this] def commence: Unit = {
         loginFr.close
-        mainFrame = new principalFrame
+        if ( Loader.getUser.isElev ) elevFr = new studFrame
+        else profFr = new teacFrame
     }
-
-    private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
-
-    private[this] def getPas: String = {
-        val alfa = "XDvC"
-        val beta = alfa + "SS"
-        beta + alfa.reverse
-    }
-
-    class principalFrame extends MainFrame {
-        title = Loader.getSettings("titlu")
-        preferredSize = new Dimension(640, 480)
+    
+    //The frame a student account sees after picking the module.
+    class studFrame extends MainFrame {
+        title = "Choose your module"
+        preferredSize = new Dimension(200, 120)
         resizable = false
 
         contents = new BoxPanel( Orientation.Vertical ){
@@ -43,6 +39,19 @@ object Frame {
         visible = true
     }
 
+    //Teacher's frame.
+    class teacFrame extends MainFrame {
+        title = "Admin"
+        preferredSize = new Dimension(800, 600)
+        resizable = false
+
+        
+
+        centerOnScreen
+        visible = true
+    }
+
+    //The registration frame.
     class registerFrame extends MainFrame {
         title = "Register"
         preferredSize = new Dimension(220, 290)
@@ -116,7 +125,6 @@ object Frame {
                 contents += creare
             }
 
-
             border = Swing.EmptyBorder(10, 10, 10, 10)
             contents.foreach( x => x.xLayoutAlignment = 0.5 )
         }
@@ -126,8 +134,17 @@ object Frame {
         reactions += {
             case ButtonClicked(button) => {
                 button.text match {
-                    case "Elev" => {optional.text = "Clasa"; special.peer.setText(""); special.editable = false; opttext.text = ""}
-                    case "Profesor" => {optional.text = "Disciplina"; special.editable = true; opttext.text = ""}
+                    case "Elev" => {
+                        optional.text = "Clasa"
+                        special.peer.setText("")
+                        special.editable = false
+                        opttext.text = ""
+                    }
+                    case "Profesor" => {
+                        optional.text = "Disciplina"
+                        special.editable = true
+                        opttext.text = ""
+                    }
                 }
             }
         }
@@ -139,11 +156,11 @@ object Frame {
             if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
                 if ( Loader.getLog(username) == "" ){
                     if ( statelev ){
-                        Loader.registerElev(username, pass, nume, prenume, scoala, opttext)
+                        Loader.register(username, pass, nume, prenume, scoala, opttext, true)
                         back
                     }
                     else if ( special.password.mkString == lid ){
-                        Loader.registerProf(username, pass, nume, prenume, scoala, opttext)
+                        Loader.register(username, pass, nume, prenume, scoala, opttext, false)
                         back
                     }
                     else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
@@ -166,6 +183,7 @@ object Frame {
         override def closeOperation = {loginFr.visible = true; close}
     }
 
+    //The login frame.
     class loginFrame extends MainFrame {
         title = "Login or Register"
         preferredSize = new Dimension(280, 150)
@@ -203,7 +221,7 @@ object Frame {
             if ( Loader.getLog(name) == "" )
                 Dialog.showMessage(contents.head, "User does not exist.", title = "Authentication Error")
             else if ( pass == Loader.getLog(name) ){
-                    currentUser = name
+                    Loader.setUser(name)
                     commence
             }
             else Dialog.showMessage(contents.head, "Incorrect password.", title = "Authentication Error")
@@ -213,5 +231,13 @@ object Frame {
             accountFrame = new registerFrame
         }
     }
+
+    private[this] def getPas: String = {
+        val alfa = "XDvC"
+        val beta = alfa + "SS"
+        beta + alfa.reverse
+    }
+
+    private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
 
 }

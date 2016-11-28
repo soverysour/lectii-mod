@@ -12,12 +12,19 @@ Besides, every instance has a [socket] listening for data / requests which can b
 ----------------------------------------------------------
 So, what to do now, since all the loading has been done...
 
--Make the main frame.
--Make the material, tests and profile sections.
--Make the gallery section.
--Make the progress saving for each user.
--Make all the data encryption.
--Make the network part of the app.
+-Add the "Select lesson" frame.
+-Add the main students' frame.
+-Add the material section, with loaded materials.
+-Add the tests section, with all the tests.
+-Add the gallery section, with all the media.
+-Add the profile section, which should contain data about the student.
+
+-Add the admin frame, the one for the teachers.
+-Add the ability to hold a class and to request data from the students.
+-Add the ability to send data to the student clients.
+-Add the ability to create new modules / components of modules.
+
+-Add the encryption of data.
 
 \\\\\\\\\\\\\\\\\\\\\\\\\\
 
