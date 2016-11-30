@@ -28,7 +28,7 @@ object Frame {
         else profFr = new teacFrame
     }
     
-    //The frame a student account sees after picking the module.
+    //The "pick a module" frame.
     class studFrame extends MainFrame {
         title = "Choose your module"
         resizable = false
@@ -55,8 +55,50 @@ object Frame {
         visible = true
     }
 
+    //The frame a student sees after picking a module.
     class elevFrame(a: String) extends MainFrame {
         Loader.load(a)
+
+        title = Loader.getSettings("titlu")
+        resizable = false
+        preferredSize = new Dimension(400, 300)
+
+        val stuff = new TabbedPane(){
+            pages += new TabbedPane.Page("Materiale", new FlowPanel {
+                Loader.getInfo.foreach( x => {
+                    contents += Button(x.nume){ open(1, x.nume) }
+                })
+                border = Swing.EmptyBorder(15, 15, 15, 15)
+                background = Color.gray
+            })
+            pages += new TabbedPane.Page("Teste", new FlowPanel {
+                Loader.getTests.foreach( x => {
+                    contents += Button(x.nume){ open(2, x.nume) }
+                })
+                border = Swing.EmptyBorder(15, 15, 15, 15)
+                background = Color.gray
+            })
+            pages += new TabbedPane.Page("Galerie", new FlowPanel {
+                Loader.getGallery.foreach( x => {
+                    contents += Button(x.nume){ open(3, x.nume) } 
+                })
+                border = Swing.EmptyBorder(15, 15, 15, 15)
+                background = Color.gray
+            })
+            pages += new TabbedPane.Page("Profil", new FlowPanel {
+
+
+                border = Swing.EmptyBorder(15, 15, 15, 15)
+                background = Color.gray
+            })
+        }
+
+        contents = stuff
+
+        centerOnScreen
+        visible = true
+
+        private[this] def open(label: Int, identity: String): Unit = {}
     }
 
     //Teacher's frame.
@@ -77,7 +119,7 @@ object Frame {
         preferredSize = new Dimension(220, 290)
         resizable = false
 
-        private[this] val username = new TextField
+        private[this] val usernume = new TextField
         private[this] val password = new PasswordField
         private[this] val nume = new TextField
         private[this] val prenume = new TextField
@@ -87,19 +129,19 @@ object Frame {
         private[this] val statelev = new RadioButton("Elev")
         private[this] val statprof = new RadioButton("Profesor")
         private[this] val status = new ButtonGroup(statelev, statprof)
-        private[this] val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
+        private[this] val creare = Button("Creare"){register(usernume.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
         private[this] val quit = Button("Inapoi"){ back }
         private[this] val special = new PasswordField
 
-        restrictHeight(username); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
+        restrictHeight(usernume); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
         statelev.selected = true
         special.editable = false
 
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += new Label("Username")
+                contents += new Label("Usernume")
                 contents += Swing.HStrut(5)
-                contents += username
+                contents += usernume
             }
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
@@ -172,15 +214,15 @@ object Frame {
         centerOnScreen
         visible = true
 
-        private[this] def register(username: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
-            if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
-                if ( Loader.getLog(username) == "" ){
+        private[this] def register(usernume: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
+            if ( good(List(usernume, pass, nume, prenume, scoala, opttext)) ){
+                if ( Loader.getLog(usernume) == "" ){
                     if ( statelev ){
-                        Loader.register(username, pass, nume, prenume, scoala, opttext, true)
+                        Loader.register(usernume, pass, nume, prenume, scoala, opttext, true)
                         back
                     }
                     else if ( special.password.mkString == lid ){
-                        Loader.register(username, pass, nume, prenume, scoala, opttext, false)
+                        Loader.register(usernume, pass, nume, prenume, scoala, opttext, false)
                         back
                     }
                     else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
@@ -208,16 +250,16 @@ object Frame {
         preferredSize = new Dimension(280, 150)
         resizable = false
 
-        private[this] val usernameField = new TextField
+        private[this] val usernumeField = new TextField
         private[this] val passwordField = new PasswordField
-        restrictHeight(usernameField)
+        restrictHeight(usernumeField)
         restrictHeight(passwordField)
         
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += new Label( "Username" )
+                contents += new Label( "Usernume" )
                 contents += Swing.HStrut(5)
-                contents += usernameField
+                contents += usernumeField
             }
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
@@ -227,7 +269,7 @@ object Frame {
             }
             contents += Swing.VStrut(10)
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += Button( "Login" ) { login(usernameField.text, passwordField.password.mkString) }
+                contents += Button( "Login" ) { login(usernumeField.text, passwordField.password.mkString) }
                 contents += Swing.HGlue
                 contents += Button("Register"){ register }
             }
@@ -236,11 +278,11 @@ object Frame {
         centerOnScreen
         visible = true
         
-        private[this] def login(name: String, pass: String): Unit = {
-            if ( Loader.getLog(name) == "" )
+        private[this] def login(nume: String, pass: String): Unit = {
+            if ( Loader.getLog(nume) == "" )
                 Dialog.showMessage(contents.head, "User does not exist.", title = "Authentication Error")
-            else if ( pass == Loader.getLog(name) ){
-                    Loader.setUser(name)
+            else if ( pass == Loader.getLog(nume) ){
+                    Loader.setUser(nume)
                     commence
             }
             else Dialog.showMessage(contents.head, "Incorrect password.", title = "Authentication Error")

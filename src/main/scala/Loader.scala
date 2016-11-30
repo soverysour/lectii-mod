@@ -6,10 +6,11 @@ object Loader {
     private[this] var users: Map[String, Cont] = Map[String, Cont]()
     private[this] var currentUser: Cont = null
     private[this] var currentModule: String = ""
-
     private[this] var settings: Map[String, String] = Map[String, String]()
+
     private[this] var info: Set[Lectura] = Set[Lectura]()
     private[this] var tests: Set[Test] = Set[Test]()
+    private[this] var gallery: Set[Gallery] = Set[Gallery]()
 
     //Load all the profiles into the users map. This is always done regardless of chosen Module.
     def init: Unit = {
@@ -21,6 +22,7 @@ object Loader {
         profiles.close
     }
 
+    //The loading that is done after the user selects a module.
     def load(s: String): Unit = {
         currentModule = s
         val genSet = Source.fromFile(System.getProperty("user.home")+"\\Draconis\\"+s+"\\settings.txt")
@@ -41,19 +43,36 @@ object Loader {
     }
     def getModules: List[String] = new File(System.getProperty("user.home")+"\\Draconis\\").listFiles.filter(_.isDirectory).toList.map(_.getName)
 
+    //Getters for info, sets and gallery entries.
+    def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
+    def getTests: List[Test] = tests.toList.sortWith(sortElem)
+    def getGallery: List[Gallery] = gallery.toList.sortWith(sortElem)
+
     //Register a new account by adding it to the users map and writing it to the users.txt.
     def register(us: String, pa: String, nu: String, pr: String, sc: String, opt: String, isElev: Boolean): Unit = {
         var sp = if ( isElev ) "e" else "p"
 
-        users += (us -> new Cont(us, pa, nu, pr, sc, opt, sp == "e") )
+        users += (us -> new Cont(us, pa, nu, pr, sc, opt, isElev) )
 
         val fw = new FileWriter(System.getProperty("user.home") + "\\Draconis\\users.txt", true)
         try { fw.write("\n" + us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp) }
         finally fw.close
     }
 
+    //Sorting methods for materials, tests and gallery entries.
+    private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
+        if ( x1.nivel == x2.nivel ) x1.nume < x2.nume
+        else x1.nivel < x2.nivel
+    }
+
+    //To facilitate sorting.
+    sealed trait ToSort {
+        def nivel: Int
+        def nume: String
+    }
+
     //Data type for holding tests, their content and their settings.
-    class Test(sourceTest: IndexedSeq[String], val name: String, val level: Int){
+    class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
         class Exercitiu(val tip: String, val ex: Set[String]){
             override def toString: String = {
                 ex foreach println
@@ -70,6 +89,8 @@ object Loader {
         }
 
         val problems = subiect
+        override def nivel: Int = level
+        override def nume: String = name
 
         override def toString: String = {
             problems foreach println
@@ -78,10 +99,18 @@ object Loader {
     }
 
     //Data type for holding materials, their content and settings.
-    class Lectura(sourceTest: IndexedSeq[String], val name: String, val level: Int){
+    class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
         val info = (for ( x <- 0 until sourceTest.size ) yield sourceTest(x) + "\n" ).mkString
+        override def nivel: Int = level
+        override def nume: String = name
 
         override def toString: String = name + level + info
+    }
+
+    //Data structure for holding gallery entrances.
+    class Gallery(val name: String, val level: Int) extends ToSort {
+        override def nivel: Int = level
+        override def nume: String = name
     }
 
     //Data type that holds both students and admin level account details.
@@ -100,9 +129,14 @@ object Loader {
                 info += new Lectura(here.getLines.toIndexedSeq, one, two)
                 here.close
             }
-            else {
+            else if ( s1 == "3" ){
                 val here = Source.fromFile(path+"tests\\"+s2)
                 tests += new Test(here.getLines.toIndexedSeq, one, two)
+                here.close
+            }
+            else {
+                val here = Source.fromFile(path+"tests\\"+s2)
+                gallery += new Gallery(one, two)
                 here.close
             }
         }

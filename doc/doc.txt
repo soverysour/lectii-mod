@@ -13,8 +13,8 @@ Besides, every instance has a [socket] listening for data / requests which can b
 So, what to do now, since all the loading has been done...
 
 #Add the "Select lesson" frame.
+#Add the main students' frame.
 
--Add the main students' frame.
 -Add the material section, with loaded materials.
 -Add the tests section, with all the tests.
 -Add the gallery section, with all the media.
@@ -60,7 +60,43 @@ The types of problems that will exist are :
 
 
 
+Let's reiterate: 
 
-THIS DOCUMENTATION IS REALLY AMBIGUOUS. KEEP EVERYTHING IN MIND AND CHANGE AS NECESSARY.
+-I open the application. 
+-The database of all the users is loaded.
+-I get to log in. 
+-I can also make an account.
+-When I make an account, depending on the type, student or teacher, I have different fields to fill.
+-Depending on the type of the account, I will have different interaction after I log in.
 
-For now, finish everything that is related to the students, absolutely everything. Afterwards, optimise, change, improve and THEN switch to everything about the teachers.
+If I log in with a student account : 
+
+    -I get to pick a current module. 
+    -After I pick a module, all the data related to that module is loaded.
+    -I can go over the materials, gallery, complete a test or see my profile.
+    -I can also change the running module, for a different lesson.
+
+    -Materials are all put in the materials bar. All the data, sorted, which pops when clicked on.
+    -The tests are also there, sorted, with a disginguishing element on, where the case is, to show which has been completed and which has not.
+    -The gallery works in the same way as the materials section, sorted and popping.
+    -The profile section displays overall statistics and analysis of the data stored, per account.
+    -The profile section doesn't go into full detail, even though it keeps it. Just to fit.
+
+-The progress storing is done per account, then per element(gallery, test, material). 
+-It keeps all sorts of information, either to process it and display locally, or to parse it via network.
+
+If I log in with a teacher account : 
+    
+    -I can create a new module / bits of a module.
+    -I can edit / delete a module / bits of a module, only locally.
+    -I get o create and manage classes, where clients have IPs and other details.
+    -I get to send data to clients and make requests to the clients, to get data back.
+    -I also get to manage the database of local accounts.
+
+-A user of a student client has nothing to do directly with the networking part. The client works, but always obeys.
+-A teacher client can only push to and get information from, not manage it locally, such as deleting data from the client, therefore, each client has to manage its own data through a teacher account.
+
+To de-obfuscate:
+-A student account user sits, reads and solves. The client agrees to whatever else is going on on the network
+-A teacher account usr sits, reads, solves, builds, requests and sends. It is the one giving orders to the classroom.
+-As for local setup, the student account can do nothing. The teacher account can delete / change local files. Now, this can only happen locally, unfortunately. There can be no teacher on a network,simply deleting / altering files.
