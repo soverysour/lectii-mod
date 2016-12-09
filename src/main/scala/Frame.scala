@@ -50,7 +50,6 @@ object Frame {
             starFr = new elevFrame(a)
         }
 
-        peer.pack
         centerOnScreen
         visible = true
     }
@@ -98,7 +97,87 @@ object Frame {
         centerOnScreen
         visible = true
 
-        private[this] def open(label: Int, identity: String): Unit = {}
+        private[this] def open(label: Int, identity: String): Unit = {
+            if ( label == 1 ) Loader.getExactInfo(identity) match {
+                case Some(x) => new matFrame(x); starFr.visible = false
+                case None => {}
+            }
+            else if ( label == 2 ) Loader.getExactTest(identity) match {
+                case Some(x) => new tesFrame(x); starFr.visible = false
+                case None => {}
+            }
+            else Loader.getExactGallery(identity) match {
+                case Some(x) => new galFrame(x); starFr.visible = false
+                case None => {}
+            }
+        }
+    }
+
+    //An opened test.
+    class tesFrame(source: Loader.Test) extends MainFrame {
+        var chooseVariant
+        class chooseVariant(exer: Loader.Test) {
+            //USe case classes, create a new Processor object, do processing, identity based matching, etc. Especially for progress and everything related to that.
+        }
+        class completeEmpty(exer: Loader.Test) {
+
+        }
+        class dragDrop(exer: Loader.Test) {
+
+        }
+
+        title = source.nume
+        resizable = false
+        preferredSize = new Dimension(640, 480)
+
+        contents = new BoxPanel( Orientation.Vertical ){
+
+        }
+
+        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+        override def closeOperation = {
+            close
+            starFr.visible = true
+        }
+
+        centerOnScreen
+        visible = true
+    }
+
+    //An opened material.
+    class matFrame(source: Loader.Lectura) extends MainFrame {
+        title = source.nume
+        resizable = false
+        preferredSize = new Dimension(640, 480)
+
+        contents = new TextPane(){
+            background = Color.gray
+            foreground = Color.white
+
+            text = source.nume + "\n\n" + source.info
+            editable = false
+        }
+
+        peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+        override def closeOperation = {
+            close
+            starFr.visible = true
+        }
+
+        centerOnScreen
+        visible = true
+    }
+
+    //An opened gallery entry.
+    class galFrame(source: Loader.Gallery) extends MainFrame {
+        title = source.nume
+        resizable = false
+        preferredSize = new Dimension(640, 480)
+
+        contents = new TextPane(){}
+
+        centerOnScreen
+        visible = true
     }
 
     //Teacher's frame.
@@ -119,7 +198,7 @@ object Frame {
         preferredSize = new Dimension(220, 290)
         resizable = false
 
-        private[this] val usernume = new TextField
+        private[this] val username = new TextField
         private[this] val password = new PasswordField
         private[this] val nume = new TextField
         private[this] val prenume = new TextField
@@ -129,19 +208,19 @@ object Frame {
         private[this] val statelev = new RadioButton("Elev")
         private[this] val statprof = new RadioButton("Profesor")
         private[this] val status = new ButtonGroup(statelev, statprof)
-        private[this] val creare = Button("Creare"){register(usernume.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
+        private[this] val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
         private[this] val quit = Button("Inapoi"){ back }
         private[this] val special = new PasswordField
 
-        restrictHeight(usernume); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
+        restrictHeight(username); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
         statelev.selected = true
         special.editable = false
 
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += new Label("Usernume")
+                contents += new Label("Username")
                 contents += Swing.HStrut(5)
-                contents += usernume
+                contents += username
             }
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
@@ -214,15 +293,15 @@ object Frame {
         centerOnScreen
         visible = true
 
-        private[this] def register(usernume: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
-            if ( good(List(usernume, pass, nume, prenume, scoala, opttext)) ){
-                if ( Loader.getLog(usernume) == "" ){
+        private[this] def register(username: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
+            if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
+                if ( Loader.getLog(username) == "" ){
                     if ( statelev ){
-                        Loader.register(usernume, pass, nume, prenume, scoala, opttext, true)
+                        Loader.register(username, pass, nume, prenume, scoala, opttext, true)
                         back
                     }
                     else if ( special.password.mkString == lid ){
-                        Loader.register(usernume, pass, nume, prenume, scoala, opttext, false)
+                        Loader.register(username, pass, nume, prenume, scoala, opttext, false)
                         back
                     }
                     else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
@@ -250,16 +329,16 @@ object Frame {
         preferredSize = new Dimension(280, 150)
         resizable = false
 
-        private[this] val usernumeField = new TextField
+        private[this] val usernameField = new TextField
         private[this] val passwordField = new PasswordField
-        restrictHeight(usernumeField)
+        restrictHeight(usernameField)
         restrictHeight(passwordField)
         
         contents = new BoxPanel( Orientation.Vertical ){
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += new Label( "Usernume" )
+                contents += new Label( "Username" )
                 contents += Swing.HStrut(5)
-                contents += usernumeField
+                contents += usernameField
             }
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
@@ -269,7 +348,7 @@ object Frame {
             }
             contents += Swing.VStrut(10)
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += Button( "Login" ) { login(usernumeField.text, passwordField.password.mkString) }
+                contents += Button( "Login" ) { login(usernameField.text, passwordField.password.mkString) }
                 contents += Swing.HGlue
                 contents += Button("Register"){ register }
             }

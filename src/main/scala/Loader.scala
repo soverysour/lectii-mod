@@ -4,9 +4,9 @@ import java.io.{File, FileWriter}
 
 object Loader {
     private[this] var users: Map[String, Cont] = Map[String, Cont]()
+    private[this] var settings: Map[String, String] = Map[String, String]()
     private[this] var currentUser: Cont = null
     private[this] var currentModule: String = ""
-    private[this] var settings: Map[String, String] = Map[String, String]()
 
     private[this] var info: Set[Lectura] = Set[Lectura]()
     private[this] var tests: Set[Test] = Set[Test]()
@@ -48,6 +48,20 @@ object Loader {
     def getTests: List[Test] = tests.toList.sortWith(sortElem)
     def getGallery: List[Gallery] = gallery.toList.sortWith(sortElem)
 
+    //Exact getters for info, sets and gallery entries.
+    def getExactInfo(name: String): Option[Lectura] = {
+        info.foreach( x => if ( x.nume == name ) return Some(x) )
+        None
+    }
+    def getExactTest(name: String): Option[Test] = {
+        tests.foreach( x => if ( x.nume == name ) return Some(x) )
+        None
+    }
+    def getExactGallery(name: String): Option[Gallery] = {
+        gallery.foreach( x => if ( x.nume == name ) return Some(x) )
+        None
+    }
+
     //Register a new account by adding it to the users map and writing it to the users.txt.
     def register(us: String, pa: String, nu: String, pr: String, sc: String, opt: String, isElev: Boolean): Unit = {
         var sp = if ( isElev ) "e" else "p"
@@ -59,7 +73,7 @@ object Loader {
         finally fw.close
     }
 
-    //Sorting methods for materials, tests and gallery entries.
+    //Sorting method for materials, tests and gallery entries.
     private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
         if ( x1.nivel == x2.nivel ) x1.nume < x2.nume
         else x1.nivel < x2.nivel
@@ -67,13 +81,13 @@ object Loader {
 
     //To facilitate sorting.
     sealed trait ToSort {
-        def nivel: Int
-        def nume: String
+        val nivel: Int
+        val nume: String
     }
 
     //Data type for holding tests, their content and their settings.
     class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-        class Exercitiu(val tip: String, val ex: Set[String]){
+        sealed class Exercitiu(val tip: String, val ex: Set[String]){
             override def toString: String = {
                 ex foreach println
                 tip
@@ -89,8 +103,8 @@ object Loader {
         }
 
         val problems = subiect
-        override def nivel: Int = level
-        override def nume: String = name
+        override val nivel: Int = level
+        override val nume: String = name
 
         override def toString: String = {
             problems foreach println
@@ -101,16 +115,16 @@ object Loader {
     //Data type for holding materials, their content and settings.
     class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
         val info = (for ( x <- 0 until sourceTest.size ) yield sourceTest(x) + "\n" ).mkString
-        override def nivel: Int = level
-        override def nume: String = name
+        override val nivel: Int = level
+        override val nume: String = name
 
         override def toString: String = name + level + info
     }
 
     //Data structure for holding gallery entrances.
     class Gallery(val name: String, val level: Int) extends ToSort {
-        override def nivel: Int = level
-        override def nume: String = name
+        override val nivel: Int = level
+        override val nume: String = name
     }
 
     //Data type that holds both students and admin level account details.
