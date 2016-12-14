@@ -2,7 +2,7 @@ import scala.collection.mutable.{Map, Set}
 import scala.io.Source
 import java.io.{File, FileWriter}
 
-object Loader {
+object Holder {
     private[this] var users: Map[String, Cont] = Map[String, Cont]()
     private[this] var settings: Map[String, String] = Map[String, String]()
     private[this] var currentUser: Cont = null
@@ -33,7 +33,8 @@ object Loader {
         genSet.close
     }
 
-    //Get value of a setting inside a module or the password for a user (independent of module) or set the currentUser or get the currentUser.
+    //Get value of a setting inside a module or the password for a user (independent of module) 
+    //or set the currentUser or get the currentUser.
     def getUser: Cont = currentUser
     def setUser(arg: String): Unit = { currentUser = users(arg) }
     def getSettings(arg: String): String = settings(arg)
@@ -41,7 +42,8 @@ object Loader {
         try { users(arg).parola }
         catch { case _: Throwable => "" }
     }
-    def getModules: List[String] = new File(System.getProperty("user.home")+"\\Draconis\\").listFiles.filter(_.isDirectory).toList.map(_.getName)
+    def getModules: List[String] = new File(System.getProperty("user.home")+"\\Draconis\\").
+        listFiles.filter(_.isDirectory).toList.map(_.getName)
 
     //Getters for info, sets and gallery entries.
     def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
@@ -63,7 +65,8 @@ object Loader {
     }
 
     //Register a new account by adding it to the users map and writing it to the users.txt.
-    def register(us: String, pa: String, nu: String, pr: String, sc: String, opt: String, isElev: Boolean): Unit = {
+    def register(us: String, pa: String, nu: String, pr: String, sc: String,
+                 opt: String, isElev: Boolean): Unit = {
         var sp = if ( isElev ) "e" else "p"
 
         users += (us -> new Cont(us, pa, nu, pr, sc, opt, isElev) )
@@ -128,8 +131,10 @@ object Loader {
     }
 
     //Data type that holds both students and admin level account details.
-    class Cont(val username: String, val parola: String, val nume: String, val prenume: String, val scoala: String, val opttext: String, val isElev: Boolean){
-        override def toString: String = { username + " " + parola + " " + nume + " " + prenume + " " + scoala + " " + opttext + " " + isElev }
+    class Cont(val username: String, val parola: String, val nume: String, val prenume: String,
+               val scoala: String, val opttext: String, val isElev: Boolean){
+        override def toString: String = { username + " " + parola + " " + nume + " " + prenume + " " +
+                                          scoala + " " + opttext + " " + isElev }
     }
     
     //From the settings file, either adds a setting, a test or a material.

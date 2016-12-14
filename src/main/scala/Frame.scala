@@ -17,14 +17,14 @@ object Frame {
 
     //Load the login frame and initiate the loading of the users and their credentials.
     def main(args: Array[String]): Unit = {
-        Loader.init
+        Holder.init
         loginFr = new loginFrame
     }
 
     //This is what happens when someone succesfully logs in. 
     private[this] def commence: Unit = {
         loginFr.close
-        if ( Loader.getUser.isElev ) elevFr = new studFrame
+        if ( Holder.getUser.isElev ) elevFr = new studFrame
         else profFr = new teacFrame
     }
     
@@ -34,7 +34,7 @@ object Frame {
         resizable = false
         private[this] var asdf: Set[Button] = Set[Button]()
 
-        Loader.getModules.foreach( x => {asdf += Button(x){ sweep(x) }} )
+        Holder.getModules.foreach( x => {asdf += Button(x){ sweep(x) }} )
         asdf foreach restrictHeight
 
         contents = new BoxPanel( Orientation.Vertical ){
@@ -56,29 +56,29 @@ object Frame {
 
     //The frame a student sees after picking a module.
     class elevFrame(a: String) extends MainFrame {
-        Loader.load(a)
+        Holder.load(a)
 
-        title = Loader.getSettings("titlu")
+        title = Holder.getSettings("titlu")
         resizable = false
         preferredSize = new Dimension(400, 300)
 
         val stuff = new TabbedPane(){
             pages += new TabbedPane.Page("Materiale", new FlowPanel {
-                Loader.getInfo.foreach( x => {
+                Holder.getInfo.foreach( x => {
                     contents += Button(x.nume){ open(1, x.nume) }
                 })
                 border = Swing.EmptyBorder(15, 15, 15, 15)
                 background = Color.gray
             })
             pages += new TabbedPane.Page("Teste", new FlowPanel {
-                Loader.getTests.foreach( x => {
+                Holder.getTests.foreach( x => {
                     contents += Button(x.nume){ open(2, x.nume) }
                 })
                 border = Swing.EmptyBorder(15, 15, 15, 15)
                 background = Color.gray
             })
             pages += new TabbedPane.Page("Galerie", new FlowPanel {
-                Loader.getGallery.foreach( x => {
+                Holder.getGallery.foreach( x => {
                     contents += Button(x.nume){ open(3, x.nume) } 
                 })
                 border = Swing.EmptyBorder(15, 15, 15, 15)
@@ -98,15 +98,15 @@ object Frame {
         visible = true
 
         private[this] def open(label: Int, identity: String): Unit = {
-            if ( label == 1 ) Loader.getExactInfo(identity) match {
+            if ( label == 1 ) Holder.getExactInfo(identity) match {
                 case Some(x) => new matFrame(x); starFr.visible = false
                 case None => {}
             }
-            else if ( label == 2 ) Loader.getExactTest(identity) match {
+            else if ( label == 2 ) Holder.getExactTest(identity) match {
                 case Some(x) => new tesFrame(x); starFr.visible = false
                 case None => {}
             }
-            else Loader.getExactGallery(identity) match {
+            else Holder.getExactGallery(identity) match {
                 case Some(x) => new galFrame(x); starFr.visible = false
                 case None => {}
             }
@@ -114,18 +114,7 @@ object Frame {
     }
 
     //An opened test.
-    class tesFrame(source: Loader.Test) extends MainFrame {
-        var chooseVariant
-        class chooseVariant(exer: Loader.Test) {
-            //USe case classes, create a new Processor object, do processing, identity based matching, etc. Especially for progress and everything related to that.
-        }
-        class completeEmpty(exer: Loader.Test) {
-
-        }
-        class dragDrop(exer: Loader.Test) {
-
-        }
-
+    class tesFrame(source: Holder.Test) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -145,7 +134,7 @@ object Frame {
     }
 
     //An opened material.
-    class matFrame(source: Loader.Lectura) extends MainFrame {
+    class matFrame(source: Holder.Lectura) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -169,7 +158,7 @@ object Frame {
     }
 
     //An opened gallery entry.
-    class galFrame(source: Loader.Gallery) extends MainFrame {
+    class galFrame(source: Holder.Gallery) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -208,11 +197,20 @@ object Frame {
         private[this] val statelev = new RadioButton("Elev")
         private[this] val statprof = new RadioButton("Profesor")
         private[this] val status = new ButtonGroup(statelev, statprof)
-        private[this] val creare = Button("Creare"){register(username.text, password.password.mkString, nume.text, prenume.text, scoala.text, opttext.text, statelev.selected)}
+        private[this] val creare = Button("Creare"){
+            register(username.text, password.password.mkString, nume.text, 
+                     prenume.text, scoala.text, opttext.text, statelev.selected) 
+        }
         private[this] val quit = Button("Inapoi"){ back }
         private[this] val special = new PasswordField
 
-        restrictHeight(username); restrictHeight(password); restrictHeight(nume); restrictHeight(prenume); restrictHeight(scoala); restrictHeight(opttext)
+        restrictHeight(username); 
+        restrictHeight(password); 
+        restrictHeight(nume); 
+        restrictHeight(prenume); 
+        restrictHeight(scoala); 
+        restrictHeight(opttext)
+
         statelev.selected = true
         special.editable = false
 
@@ -293,15 +291,17 @@ object Frame {
         centerOnScreen
         visible = true
 
-        private[this] def register(username: String, pass: String, nume: String, prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
+        private[this] def register(username: String, pass: String, nume: String, prenume: String, 
+                                   scoala: String, opttext: String, statelev: Boolean): Unit = {
+                                   
             if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
-                if ( Loader.getLog(username) == "" ){
+                if ( Holder.getLog(username) == "" ){
                     if ( statelev ){
-                        Loader.register(username, pass, nume, prenume, scoala, opttext, true)
+                        Holder.register(username, pass, nume, prenume, scoala, opttext, true)
                         back
                     }
                     else if ( special.password.mkString == lid ){
-                        Loader.register(username, pass, nume, prenume, scoala, opttext, false)
+                        Holder.register(username, pass, nume, prenume, scoala, opttext, false)
                         back
                     }
                     else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
@@ -358,10 +358,10 @@ object Frame {
         visible = true
         
         private[this] def login(nume: String, pass: String): Unit = {
-            if ( Loader.getLog(nume) == "" )
+            if ( Holder.getLog(nume) == "" )
                 Dialog.showMessage(contents.head, "User does not exist.", title = "Authentication Error")
-            else if ( pass == Loader.getLog(nume) ){
-                    Loader.setUser(nume)
+            else if ( pass == Holder.getLog(nume) ){
+                    Holder.setUser(nume)
                     commence
             }
             else Dialog.showMessage(contents.head, "Incorrect password.", title = "Authentication Error")
@@ -378,6 +378,7 @@ object Frame {
         beta + alfa.reverse
     }
 
-    private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
+    private[this] def restrictHeight(s: Component): Unit = s.maximumSize = 
+      new Dimension(Short.MaxValue, s.preferredSize.height)
 
 }
