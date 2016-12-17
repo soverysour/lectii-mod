@@ -6,12 +6,12 @@ import scala.collection.mutable.Set
 
 object Frame {
     private[this] var loginFr: loginFrame = null
-    private[this] var accountFrame: registerFrame = null
+    private[this] var registerFr: registerFrame = null
 
-    private[this] var elevFr: studFrame = null
-    private[this] var starFr: elevFrame = null
+    private[this] var moduleFr: moduleFrame = null
+    private[this] var elevFr: elevFrame = null
 
-    private[this] var profFr: teacFrame = null
+    private[this] var teacherFr: teacherFrame = null
 
     private[this] val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
@@ -24,12 +24,12 @@ object Frame {
     //This is what happens when someone succesfully logs in.
     private[this] def commence: Unit = {
         loginFr.close
-        if ( Holder.getUser.isElev ) elevFr = new studFrame
-        else profFr = new teacFrame
+        if ( Holder.getUser.isElev ) moduleFr = new moduleFrame
+        else teacherFr = new teacherFrame
     }
 
     //The "pick a module" frame.
-    class studFrame extends MainFrame {
+    class moduleFrame extends MainFrame {
         title = "Choose your module"
         resizable = false
         private[this] var asdf: Set[Button] = Set[Button]()
@@ -51,7 +51,7 @@ object Frame {
 
         private[this] def sweep(a: String): Unit = {
             close
-            starFr = new elevFrame(a)
+            elevFr = new elevFrame(a)
         }
 
         centerOnScreen
@@ -103,22 +103,22 @@ object Frame {
 
         private[this] def open(label: Int, identity: String): Unit = {
             if ( label == 1 ) Holder.getExactInfo(identity) match {
-                case Some(x) => new matFrame(x); starFr.visible = false
+                case Some(x) => new materialFrame(x); elevFr.visible = false
                 case None => {}
             }
             else if ( label == 2 ) Holder.getExactTest(identity) match {
-                case Some(x) => new tesFrame(x); starFr.visible = false
+                case Some(x) => new testFrame(x); elevFr.visible = false
                 case None => {}
             }
             else Holder.getExactGallery(identity) match {
-                case Some(x) => new galFrame(x); starFr.visible = false
+                case Some(x) => new galleryFrame(x); elevFr.visible = false
                 case None => {}
             }
         }
     }
 
     //An opened test.
-    class tesFrame(source: Holder.Test) extends MainFrame {
+    class testFrame(source: Holder.Test) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -130,7 +130,7 @@ object Frame {
         peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
         override def closeOperation = {
             close
-            starFr.visible = true
+            elevFr.visible = true
         }
 
         centerOnScreen
@@ -138,7 +138,7 @@ object Frame {
     }
 
     //An opened material.
-    class matFrame(source: Holder.Lectura) extends MainFrame {
+    class materialFrame(source: Holder.Lectura) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -154,7 +154,7 @@ object Frame {
         peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
         override def closeOperation = {
             close
-            starFr.visible = true
+            elevFr.visible = true
         }
 
         centerOnScreen
@@ -162,7 +162,7 @@ object Frame {
     }
 
     //An opened gallery entry.
-    class galFrame(source: Holder.Gallery) extends MainFrame {
+    class galleryFrame(source: Holder.Gallery) extends MainFrame {
         title = source.nume
         resizable = false
         preferredSize = new Dimension(640, 480)
@@ -174,7 +174,7 @@ object Frame {
     }
 
     //Teacher's frame.
-    class teacFrame extends MainFrame {
+    class teacherFrame extends MainFrame {
         title = "Admin"
         preferredSize = new Dimension(800, 600)
         resizable = false
@@ -264,7 +264,7 @@ object Frame {
             contents += special
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += quitt
+                contents += quit
                 contents += Swing.HGlue
                 contents += creare
             }
@@ -373,7 +373,7 @@ object Frame {
         }
         private[this] def register: Unit = {
             visible = false
-            accountFrame = new registerFrame
+            registerFr = new registerFrame
         }
     }
 

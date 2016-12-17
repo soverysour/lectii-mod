@@ -100,3 +100,16 @@ To de-obfuscate:
 -A student account user sits, reads and solves. The client agrees to whatever else is going on on the network
 -A teacher account usr sits, reads, solves, builds, requests and sends. It is the one giving orders to the classroom.
 -As for local setup, the student account can do nothing. The teacher account can delete / change local files. Now, this can only happen locally, unfortunately. There can be no teacher on a network,simply deleting / altering files.
+
+
+###################################
+
+I'm not even going to bother with what's written above. What I should be doing this winter "free-time" is as follows:
+
+	Change code around the "main objects" so they obey the following: 
+		-A holder object, to hold all the information and provide functions to hand it, as well as data
+		 structures and a personal ability to process it, not open files though.
+		-A frame object, to do everything related to the frame. It takes info from Holder, projects it,
+		 occasionally sending feedback to the core object.
+		-A core object, which will do everything read / write related, as well as any aditional computing
+		 requirements. This will also handle all about networking, if there is going to be such thing.

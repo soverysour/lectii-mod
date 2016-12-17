@@ -44,8 +44,8 @@ object Holder {
         try { users(arg).parola }
         catch { case _: Throwable => "" }
     }
-    def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").
-    listFiles.filter(_.isDirectory).toList.map(_.getName)
+    def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").listFiles.
+    	filter(_.isDirectory).toList.map(_.getName)
 
     //Getters for info, sets and gallery entries.
     def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
