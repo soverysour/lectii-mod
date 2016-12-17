@@ -44,8 +44,8 @@ object Holder {
         try { users(arg).parola }
         catch { case _: Throwable => "" }
     }
-    def getModules: List[String] = new
-    File(System.getProperty("user.home")+"/Draconis/").listFiles.filter(_.isDirectory).toList.map(_.getName)
+    def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").
+    listFiles.filter(_.isDirectory).toList.map(_.getName)
 
     //Getters for info, sets and gallery entries.
     def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
@@ -74,8 +74,7 @@ object Holder {
         users += (us -> new Cont(us, pa, nu, pr, sc, opt, isElev) )
 
         val fw = new FileWriter(System.getProperty("user.home") + "/Draconis/users.txt", true)
-        try { fw.write( us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp
-        + "\n" ) }
+        try { fw.write( us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp + "\n" ) }
         finally fw.close
     }
 
@@ -136,8 +135,9 @@ object Holder {
     //Data type that holds both students and admin level account details.
     class Cont(val username: String, val parola: String, val nume: String, val prenume: String,
                val scoala: String, val opttext: String, val isElev: Boolean){
-        override def toString: String = { username + " " + parola + " " + nume + " " + prenume + " " +
-                                          scoala + " " + opttext + " " + isElev }
+
+        override def toString: String = username +" "+ parola +" "+ nume +" "+
+            prenume +" "+ scoala +" "+ opttext +" "+ isElev
     }
 
     //From the settings file, either adds a setting, a test or a material.

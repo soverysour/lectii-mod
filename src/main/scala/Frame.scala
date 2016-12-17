@@ -264,7 +264,7 @@ object Frame {
             contents += special
             contents += Swing.VStrut(5)
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += quit
+                contents += quitt
                 contents += Swing.HGlue
                 contents += creare
             }
@@ -296,8 +296,8 @@ object Frame {
         centerOnScreen
         visible = true
 
-        private[this] def register(username: String, pass: String, nume: String, prenume: String,
-                                   scoala: String, opttext: String, statelev: Boolean): Unit = {
+        private[this] def register(username: String, pass: String, nume: String,
+            prenume: String, scoala: String, opttext: String, statelev: Boolean): Unit = {
 
             if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
                 if ( Holder.getLog(username) == "" ){
