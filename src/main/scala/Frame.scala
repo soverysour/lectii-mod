@@ -17,7 +17,7 @@ object Frame {
 
     //Load the login frame and initiate the loading of the users and their credentials.
     def main(args: Array[String]): Unit = {
-        Holder.init
+        Core.initUsers
         loginFr = new loginFrame
     }
 
@@ -34,7 +34,7 @@ object Frame {
         resizable = false
         private[this] var asdf: Set[Button] = Set[Button]()
 
-        Holder.getModules.foreach( x => {asdf += Button(x){ sweep(x) }} )
+        Core.getModules.foreach( x => {asdf += Button(x){ sweep(x) }} )
         asdf foreach restrictHeight
         var ss = new Dimension(0, 0)
 
@@ -60,7 +60,7 @@ object Frame {
 
     //The frame a student sees after picking a module.
     class elevFrame(a: String) extends MainFrame {
-        Holder.load(a)
+        Core.initModule(a)
 
         title = Holder.getSettings("titlu")
         resizable = false
@@ -302,11 +302,11 @@ object Frame {
             if ( good(List(username, pass, nume, prenume, scoala, opttext)) ){
                 if ( Holder.getLog(username) == "" ){
                     if ( statelev ){
-                        Holder.register(username, pass, nume, prenume, scoala, opttext, true)
+                        Core.register(username, pass, nume, prenume, scoala, opttext, true)
                         back
                     }
                     else if ( special.password.mkString == lid ){
-                        Holder.register(username, pass, nume, prenume, scoala, opttext, false)
+                        Core.register(username, pass, nume, prenume, scoala, opttext, false)
                         back
                     }
                     else Dialog.showMessage(contents.head, "Invalid token.", title = "Input Error")
@@ -353,7 +353,7 @@ object Frame {
             }
             contents += Swing.VStrut(10)
             contents += new BoxPanel( Orientation.Horizontal ){
-                contents += Button( "Login" ) { login(usernameField.text, passwordField.password.mkString) }
+                contents += Button( "Login" ){ login(usernameField.text, passwordField.password.mkString) }
                 contents += Swing.HGlue
                 contents += Button("Register"){ register }
             }

@@ -1,6 +1,4 @@
 import scala.collection.mutable.{Map, Set}
-import scala.io.Source
-import java.io.{File, FileWriter}
 
 object Holder {
     private[this] var users: Map[String, Cont] = Map[String, Cont]()
@@ -13,39 +11,24 @@ object Holder {
     private[this] var gallery: Set[Gallery] = Set[Gallery]()
 
     //Load all the profiles into the users map. This is always done regardless of chosen Module.
-    def init: Unit = {
-        val profiles =
-        Source.fromFile(System.getProperty("user.home")+"/Draconis/users.txt")
-        profiles.getLines.toIndexedSeq.foreach( x => {
+    def loadUsers(profiles: IndexedSeq[String]): Unit = {
+        profiles.foreach( x => {
             val e = x.split("[,]")
             users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == "e"))
         })
-        profiles.close
     }
-
-    //The loading that is done after the user selects a module.
-    def load(s: String): Unit = {
-        currentModule = s
-        val genSet =
-        Source.fromFile(System.getProperty("user.home")+"/Draconis/"+s+"/settings.txt")
-        genSet.getLines.toIndexedSeq.foreach( x => {
-            val ss = x.split("[=]")
-            readNload(ss(0), ss(1), ss(2))
-        })
-        genSet.close
-    }
-
-    //Get value of a setting inside a module or the password for a user (independent of module)
-    //or set the currentUser or get the currentUser.
+    
+    //All sorts of getters / setters.
+    def setModule(m: String): Unit = { currentModule = m }
+    def getModule: String = currentModule
     def getUser: Cont = currentUser
     def setUser(arg: String): Unit = { currentUser = users(arg) }
     def getSettings(arg: String): String = settings(arg)
+    def setSettings(s: (String, String)): Unit = { settings += s }
     def getLog(arg: String): String = {
         try { users(arg).parola }
         catch { case _: Throwable => "" }
     }
-    def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").listFiles.
-    	filter(_.isDirectory).toList.map(_.getName)
 
     //Getters for info, sets and gallery entries.
     def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
@@ -65,18 +48,10 @@ object Holder {
         gallery.foreach( x => if ( x.nume == name ) return Some(x) )
         None
     }
-
-    //Register a new account by adding it to the users map and writing it to the users.txt.
-    def register(us: String, pa: String, nu: String, pr: String, sc: String,
-                 opt: String, isElev: Boolean): Unit = {
-        var sp = if ( isElev ) "e" else "p"
-
-        users += (us -> new Cont(us, pa, nu, pr, sc, opt, isElev) )
-
-        val fw = new FileWriter(System.getProperty("user.home") + "/Draconis/users.txt", true)
-        try { fw.write( us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp + "\n" ) }
-        finally fw.close
-    }
+    
+    def addLectura(i: IndexedSeq[String], nu: String, ni: Int): Unit = { info += new Lectura(i, nu, ni) }
+    def addTest(i: IndexedSeq[String], nu: String, ni: Int): Unit = { tests += new Test(i, nu, ni) }
+    def addGallery(nu: String, ni: Int): Unit = { gallery += new Gallery(nu, ni) } 
 
     //Sorting method for materials, tests and gallery entries.
     private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
@@ -138,31 +113,6 @@ object Holder {
 
         override def toString: String = username +" "+ parola +" "+ nume +" "+
             prenume +" "+ scoala +" "+ opttext +" "+ isElev
-    }
-
-    //From the settings file, either adds a setting, a test or a material.
-    private[this] def readNload(s1: String, s2: String, s3: String): Unit = {
-        if ( s1 == "1" ) settings += ( s2 -> s3 )
-        else {
-            val path =
-            System.getProperty("user.home")+"/Draconis/"+currentModule
-            val (one, two) = (s3.split("[,]")(0), s3.split("[,]")(1).toInt)
-            if ( s1 == "2" ){
-                val here = Source.fromFile(path+"/material/"+s2)
-                info += new Lectura(here.getLines.toIndexedSeq, one, two)
-                here.close
-            }
-            else if ( s1 == "3" ){
-                val here = Source.fromFile(path+"/test/"+s2)
-                tests += new Test(here.getLines.toIndexedSeq, one, two)
-                here.close
-            }
-            else {
-                val here = Source.fromFile(path+"/gallery/"+s2)
-                gallery += new Gallery(one, two)
-                here.close
-            }
-        }
     }
 
     private[this] def runCheckings: Unit = {
