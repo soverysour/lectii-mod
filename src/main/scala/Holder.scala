@@ -67,17 +67,21 @@ object Holder {
 
     //Data type for holding tests, their content and their settings.
     class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-        sealed class Exercitiu(val tip: String, val ex: Set[String]){
+        sealed class Exercitiu(gen: String, val ex: Set[String]){
             override def toString: String = {
                 ex foreach println
                 tip
             }
+            
+            val tip = gen
+            val exercitii = for ( x <- ex ) yield ( x.split("##")(0), x.split("##")(1) )
+            
         }
         private[this] var subiect = Set[Exercitiu]()
         private[this] var exer = new Exercitiu("#", Set())
         for ( x <- 0 until sourceTest.size ){
             if ( sourceTest(x) == "##" ) subiect += new Exercitiu(exer.tip, exer.ex)
-            else if ( sourceTest(x).replaceFirst("[CD][#]{2}[EDV]", "#") == "#" )
+            else if ( sourceTest(x).replaceFirst("[CD]##[EDV]", "#") == "#" )
                 exer = new Exercitiu(sourceTest(x), Set())
             else exer = new Exercitiu(exer.tip, exer.ex + sourceTest(x) )
         }

@@ -63,6 +63,23 @@ object Core {
         }
     }
     
+    //Returns a list of all the available modules, under the root folder for the sources.
     def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").listFiles.
     	filter(_.isDirectory).toList.map(_.getName)
+   	
+   	//Evaluates the results of a test.
+    def evaluate(newSpaces: List[(String, String)], newChecks: List[(Boolean, Boolean)]): Unit = {
+    	newSpaces.foreach( x => {
+    		var k = false 
+    		x._1.split(",").foreach( y => { 
+    		if ( y.toLowerCase.trim == x._2.toLowerCase.trim )
+    			k = true
+    		})
+    		println(k)
+    	})
+    	
+    	newChecks.foreach( x => {
+    		println( x._1 == x._2 )
+    	})
+    }
 }

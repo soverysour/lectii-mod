@@ -103,15 +103,21 @@ object Frame {
 
         private[this] def open(label: Int, identity: String): Unit = {
             if ( label == 1 ) Holder.getExactInfo(identity) match {
-                case Some(x) => new materialFrame(x); elevFr.visible = false
+                case Some(x) => 
+		            new materialFrame(x)
+		            elevFr.visible = false
                 case None => {}
             }
             else if ( label == 2 ) Holder.getExactTest(identity) match {
-                case Some(x) => new testFrame(x); elevFr.visible = false
+                case Some(x) => 
+		            new testFrame(x)
+		            elevFr.visible = false
                 case None => {}
             }
             else Holder.getExactGallery(identity) match {
-                case Some(x) => new galleryFrame(x); elevFr.visible = false
+                case Some(x) => 
+		            new galleryFrame(x)
+		            elevFr.visible = false
                 case None => {}
             }
         }
@@ -120,17 +126,96 @@ object Frame {
     //An opened test.
     class testFrame(source: Holder.Test) extends MainFrame {
         title = source.nume
-        resizable = false
+        resizable = true
         preferredSize = new Dimension(640, 480)
+        
+        private[this] var emptySpaces = List[(String, TextField)]()
+        private[this] var checkBoxes = List[(Boolean, CheckBox)]()
 
-        contents = new BoxPanel( Orientation.Vertical ){
-
-        }
+        contents = new ScrollPane { contents = new BoxPanel( Orientation.Vertical ){
+			for ( x <- source.problems ){
+		
+				if ( x.tip == "C##E" ){
+					contents += new Label("Completeaza spatiul liber sub fiecare enunt cu varianta corespunzatoare.")
+					contents += Swing.VStrut(10)
+				
+					for ( alfa <- x.exercitii ){
+						contents += new Label(alfa._1)
+						contents += Swing.VStrut(5)
+						emptySpaces = (alfa._2, new TextField) :: emptySpaces
+					
+						emptySpaces(0)._2.text = "O variantaasdfasdasdasdas"
+						restrictSize(emptySpaces(0)._2)
+						emptySpaces(0)._2.text = ""
+					
+						contents += emptySpaces(0)._2
+						contents += Swing.VStrut(5)
+					}
+					contents += Swing.VStrut(10)
+				}
+			
+				else if ( x.tip == "C##V" ){
+					contents += new Label("Alege varianta corecta/variantele corecte de sub fiecare enunt.")
+					contents += Swing.VStrut(10)
+				
+					for ( alfa <- x.exercitii ){
+						contents += new Label(alfa._1)
+						contents += Swing.VStrut(5)
+					
+						contents += new BoxPanel( Orientation.Horizontal ){						
+							for ( ceva <- alfa._2.split(",") ){
+								if ( ceva.endsWith("#") ){
+									checkBoxes = (true, new CheckBox(ceva.dropRight(1) + " ;")) :: checkBoxes
+									contents += checkBoxes(0)._2
+									contents += Swing.HStrut(5)
+								}
+								else{
+									checkBoxes = (false, new CheckBox(ceva + " ;")) :: checkBoxes
+									contents += checkBoxes(0)._2
+									contents += Swing.HStrut(5)
+								}
+							}
+						}
+						contents += Swing.VStrut(5)
+					}
+					contents += Swing.VStrut(10)
+				}
+				else if ( x.tip == "D##D" ){
+					
+				}
+			
+			}
+	        contents.foreach( x => {
+		    	x.xLayoutAlignment = 0
+		    	x.yLayoutAlignment = 0
+	        })
+	        
+	        contents += Button("Am terminat"){ closeOperation }
+		
+			contents.foreach ( _ match {
+				case x: BoxPanel => restrictSize(x) 
+				case _ => {}
+			})
+		
+			border = Swing.EmptyBorder(10, 10, 10, 10)
+    	}}
 
         peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
         override def closeOperation = {
-            close
-            elevFr.visible = true
+        	val b = Dialog.showOptions(contents.head, 
+        			  "Esti sigur ca progresul pana acum e definitiv? Decizia nu se poate revoca.",
+        			  "Atentie",
+				      entries = List("Da", "Nu"),
+				      initial = 1)
+        	if ( b == Dialog.Result.Ok ){
+        		var newSpaces = emptySpaces.map( x => (x._1, x._2.text) )
+        		var newChecks = checkBoxes.map( x => (x._1, x._2.selected) )
+        		
+		        close
+		        elevFr.visible = true
+		        
+		        Core.evaluate(newSpaces, newChecks)
+		    }
         }
 
         centerOnScreen
@@ -385,5 +470,11 @@ object Frame {
 
     private[this] def restrictHeight(s: Component): Unit = s.maximumSize =
       new Dimension(Short.MaxValue, s.preferredSize.height)
+      
+    private[this] def restrictWidth(s: Component): Unit = s.maximumSize =
+      new Dimension(s.preferredSize.height, Short.MaxValue)
+      
+    private[this] def restrictSize(s: Component): Unit = s.maximumSize =
+      new Dimension(s.preferredSize.width, s.preferredSize.height)
 
 }
