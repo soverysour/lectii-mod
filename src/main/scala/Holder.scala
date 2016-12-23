@@ -17,7 +17,7 @@ object Holder {
             users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == "e"))
         })
     }
-    
+
     //All sorts of getters / setters.
     def setModule(m: String): Unit = { currentModule = m }
     def getModule: String = currentModule
@@ -48,10 +48,10 @@ object Holder {
         gallery.foreach( x => if ( x.nume == name ) return Some(x) )
         None
     }
-    
+
     def addLectura(i: IndexedSeq[String], nu: String, ni: Int): Unit = { info += new Lectura(i, nu, ni) }
     def addTest(i: IndexedSeq[String], nu: String, ni: Int): Unit = { tests += new Test(i, nu, ni) }
-    def addGallery(nu: String, ni: Int): Unit = { gallery += new Gallery(nu, ni) } 
+    def addGallery(nu: String, ni: Int): Unit = { gallery += new Gallery(nu, ni) }
 
     //Sorting method for materials, tests and gallery entries.
     private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
@@ -72,10 +72,9 @@ object Holder {
                 ex foreach println
                 tip
             }
-            
+
             val tip = gen
             val exercitii = for ( x <- ex ) yield ( x.split("##")(0), x.split("##")(1) )
-            
         }
         private[this] var subiect = Set[Exercitiu]()
         private[this] var exer = new Exercitiu("#", Set())

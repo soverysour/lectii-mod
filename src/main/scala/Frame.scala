@@ -103,19 +103,19 @@ object Frame {
 
         private[this] def open(label: Int, identity: String): Unit = {
             if ( label == 1 ) Holder.getExactInfo(identity) match {
-                case Some(x) => 
+                case Some(x) =>
 		            new materialFrame(x)
 		            elevFr.visible = false
                 case None => {}
             }
             else if ( label == 2 ) Holder.getExactTest(identity) match {
-                case Some(x) => 
+                case Some(x) =>
 		            new testFrame(x)
 		            elevFr.visible = false
                 case None => {}
             }
             else Holder.getExactGallery(identity) match {
-                case Some(x) => 
+                case Some(x) =>
 		            new galleryFrame(x)
 		            elevFr.visible = false
                 case None => {}
@@ -128,50 +128,53 @@ object Frame {
         title = source.nume
         resizable = true
         preferredSize = new Dimension(640, 480)
-        
+
+        import scala.collection.mutable.ListBuffer
+
         private[this] var emptySpaces = List[(String, TextField)]()
-        private[this] var checkBoxes = List[(Boolean, CheckBox)]()
+        private[this] var checkBoxes = ListBuffer[List[(Boolean, CheckBox)]]()
 
         contents = new ScrollPane { contents = new BoxPanel( Orientation.Vertical ){
 			for ( x <- source.problems ){
-		
+
 				if ( x.tip == "C##E" ){
 					contents += new Label("Completeaza spatiul liber sub fiecare enunt cu varianta corespunzatoare.")
 					contents += Swing.VStrut(10)
-				
+
 					for ( alfa <- x.exercitii ){
 						contents += new Label(alfa._1)
 						contents += Swing.VStrut(5)
 						emptySpaces = (alfa._2, new TextField) :: emptySpaces
-					
+
 						emptySpaces(0)._2.text = "O variantaasdfasdasdasdas"
 						restrictSize(emptySpaces(0)._2)
 						emptySpaces(0)._2.text = ""
-					
+
 						contents += emptySpaces(0)._2
 						contents += Swing.VStrut(5)
 					}
 					contents += Swing.VStrut(10)
 				}
-			
+
 				else if ( x.tip == "C##V" ){
 					contents += new Label("Alege varianta corecta/variantele corecte de sub fiecare enunt.")
 					contents += Swing.VStrut(10)
-				
+
 					for ( alfa <- x.exercitii ){
 						contents += new Label(alfa._1)
 						contents += Swing.VStrut(5)
-					
-						contents += new BoxPanel( Orientation.Horizontal ){						
+
+						contents += new BoxPanel( Orientation.Horizontal ){
+                            checkBoxes.+=:(List())
 							for ( ceva <- alfa._2.split(",") ){
 								if ( ceva.endsWith("#") ){
-									checkBoxes = (true, new CheckBox(ceva.dropRight(1) + " ;")) :: checkBoxes
-									contents += checkBoxes(0)._2
+									checkBoxes(0) = (true, new CheckBox(ceva.dropRight(1) + " ;")) :: checkBoxes(0)
+									contents += checkBoxes(0)(0)._2
 									contents += Swing.HStrut(5)
 								}
 								else{
-									checkBoxes = (false, new CheckBox(ceva + " ;")) :: checkBoxes
-									contents += checkBoxes(0)._2
+									checkBoxes(0) = (false, new CheckBox(ceva + " ;")) :: checkBoxes(0)
+									contents += checkBoxes(0)(0)._2
 									contents += Swing.HStrut(5)
 								}
 							}
@@ -181,39 +184,43 @@ object Frame {
 					contents += Swing.VStrut(10)
 				}
 				else if ( x.tip == "D##D" ){
-					
+                    //Aici.
 				}
-			
 			}
 	        contents.foreach( x => {
 		    	x.xLayoutAlignment = 0
 		    	x.yLayoutAlignment = 0
 	        })
-	        
+
 	        contents += Button("Am terminat"){ closeOperation }
-		
+
 			contents.foreach ( _ match {
-				case x: BoxPanel => restrictSize(x) 
+				case x: BoxPanel => restrictSize(x)
 				case _ => {}
 			})
-		
+
 			border = Swing.EmptyBorder(10, 10, 10, 10)
     	}}
 
         peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
         override def closeOperation = {
-        	val b = Dialog.showOptions(contents.head, 
+        	val b = Dialog.showOptions(contents.head,
         			  "Esti sigur ca progresul pana acum e definitiv? Decizia nu se poate revoca.",
         			  "Atentie",
 				      entries = List("Da", "Nu"),
 				      initial = 1)
+
         	if ( b == Dialog.Result.Ok ){
         		var newSpaces = emptySpaces.map( x => (x._1, x._2.text) )
-        		var newChecks = checkBoxes.map( x => (x._1, x._2.selected) )
-        		
+
+        		var newChecks = List[List[(Boolean, Boolean)]]()
+                checkBoxes.foreach ( x => {
+                    newChecks = x.map( y => (y._1, y._2.selected) ) :: newChecks
+                })
+
 		        close
 		        elevFr.visible = true
-		        
+
 		        Core.evaluate(newSpaces, newChecks)
 		    }
         }
@@ -264,8 +271,6 @@ object Frame {
         preferredSize = new Dimension(800, 600)
         resizable = false
 
-
-
         centerOnScreen
         visible = true
     }
@@ -288,7 +293,7 @@ object Frame {
         private[this] val status = new ButtonGroup(statelev, statprof)
         private[this] val creare = Button("Creare"){
             register(username.text, password.password.mkString, nume.text,
-                     prenume.text, scoala.text, opttext.text, statelev.selected)
+                    prenume.text, scoala.text, opttext.text, statelev.selected)
         }
         private[this] val quit = Button("Inapoi"){ back }
         private[this] val special = new PasswordField
@@ -451,8 +456,8 @@ object Frame {
             if ( Holder.getLog(nume) == "" )
                 Dialog.showMessage(contents.head, "User does not exist.", title = "Authentication Error")
             else if ( pass == Holder.getLog(nume) ){
-                    Holder.setUser(nume)
-                    commence
+                Holder.setUser(nume)
+                commence
             }
             else Dialog.showMessage(contents.head, "Incorrect password.", title = "Authentication Error")
         }
@@ -470,10 +475,10 @@ object Frame {
 
     private[this] def restrictHeight(s: Component): Unit = s.maximumSize =
       new Dimension(Short.MaxValue, s.preferredSize.height)
-      
+
     private[this] def restrictWidth(s: Component): Unit = s.maximumSize =
       new Dimension(s.preferredSize.height, Short.MaxValue)
-      
+
     private[this] def restrictSize(s: Component): Unit = s.maximumSize =
       new Dimension(s.preferredSize.width, s.preferredSize.height)
 

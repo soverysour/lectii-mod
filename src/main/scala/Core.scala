@@ -2,31 +2,31 @@ import scala.io.Source
 import java.io.{File, FileWriter}
 
 object Core {
-	
+
 	//Core initialisation of all users.
 	def initUsers: Unit = {
 		val profiles = Source.fromFile(System.getProperty("user.home")+"/Draconis/users.txt")
         Holder.loadUsers(profiles.getLines.toIndexedSeq)
         profiles.close
 	}
-	
+
 	//Core initialisation of a chosen module.
 	def initModule(s: String): Unit = {
 		Holder.setModule(s)
-		
+
 		val genSet = Source.fromFile(System.getProperty("user.home")+"/Draconis/"+s+"/settings.txt")
-		
+
         genSet.getLines.toIndexedSeq.foreach( x => {
             val ss = x.split("[=]")
             readNload(ss(0), ss(1), ss(2))
         })
-		
+
 		genSet.close
     }
-    
-    def register(us: String, pa: String, nu: String, pr: String, sc: String, 
+
+    def register(us: String, pa: String, nu: String, pr: String, sc: String,
     			 opt: String, isElev: Boolean): Unit = {
-    			 
+
         var sp = if ( isElev ) "e" else "p"
     	val link = us +","+ pa +","+ nu +","+ pr +","+ sc +","+ opt +","+ sp
 
@@ -36,8 +36,8 @@ object Core {
         try { fw.write( link + "\n" ) }
         finally fw.close
     }
-    
-    
+
+
     //From the settings file, either adds a setting, a test or a material.
     private[this] def readNload(s1: String, s2: String, s3: String): Unit = {
         if ( s1 == "1" ) Holder.setSettings( s2 -> s3 )
@@ -62,24 +62,28 @@ object Core {
             }
         }
     }
-    
+
     //Returns a list of all the available modules, under the root folder for the sources.
     def getModules: List[String] = new File(System.getProperty("user.home")+"/Draconis/").listFiles.
     	filter(_.isDirectory).toList.map(_.getName)
-   	
+
    	//Evaluates the results of a test.
-    def evaluate(newSpaces: List[(String, String)], newChecks: List[(Boolean, Boolean)]): Unit = {
+    def evaluate(newSpaces: List[(String, String)], newChecks: List[List[(Boolean, Boolean)]]): Unit = {
     	newSpaces.foreach( x => {
-    		var k = false 
-    		x._1.split(",").foreach( y => { 
+    		var k = false
+    		x._1.split(",").foreach( y => {
     		if ( y.toLowerCase.trim == x._2.toLowerCase.trim )
     			k = true
     		})
     		println(k)
     	})
-    	
+
     	newChecks.foreach( x => {
-    		println( x._1 == x._2 )
+    		var k = true
+			x.foreach ( y => {
+				k = k && (y._1 == y._2)
+			})
+			println(k)
     	})
     }
 }
