@@ -1,3 +1,5 @@
+package Draconis.romana
+
 import scala.collection.mutable.{ Map, Set }
 
 object Holder {
@@ -12,9 +14,9 @@ object Holder {
 
   //Load all the profiles into the users map. This is always done regardless of chosen Module.
   def loadUsers(profiles: IndexedSeq[String]): Unit = {
-    profiles.foreach(x ⇒ {
+    profiles.foreach(x => {
       val e = x.split("[,]")
-      users += (e(0) → new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == "e"))
+      users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == "e"))
     })
   }
 
@@ -27,7 +29,7 @@ object Holder {
   def setSettings(s: (String, String)): Unit = { settings += s }
   def getLog(arg: String): String = {
     try { users(arg).parola }
-    catch { case _: Throwable ⇒ "" }
+    catch { case _: Throwable => "" }
   }
 
   //Getters for info, sets and gallery entries.
@@ -37,15 +39,15 @@ object Holder {
 
   //Exact getters for info, sets and gallery entries.
   def getExactInfo(name: String): Option[Lectura] = {
-    info.foreach(x ⇒ if (x.nume == name) return Some(x))
+    info.foreach(x => if (x.nume == name) return Some(x))
     None
   }
   def getExactTest(name: String): Option[Test] = {
-    tests.foreach(x ⇒ if (x.nume == name) return Some(x))
+    tests.foreach(x => if (x.nume == name) return Some(x))
     None
   }
   def getExactGallery(name: String): Option[Gallery] = {
-    gallery.foreach(x ⇒ if (x.nume == name) return Some(x))
+    gallery.foreach(x => if (x.nume == name) return Some(x))
     None
   }
 
@@ -74,11 +76,11 @@ object Holder {
       }
 
       val tip = gen
-      val exercitii = for (x ← ex) yield (x.split("##")(0), x.split("##")(1))
+      val exercitii = for (x <- ex) yield (x.split("##")(0), x.split("##")(1))
     }
     private[this] var subiect = Set[Exercitiu]()
     private[this] var exer = new Exercitiu("#", Set())
-    for (x ← 0 until sourceTest.size) {
+    for (x <- 0 until sourceTest.size) {
       if (sourceTest(x) == "##") subiect += new Exercitiu(exer.tip, exer.ex)
       else if (sourceTest(x).replaceFirst("[CD]##[EDV]", "#") == "#")
         exer = new Exercitiu(sourceTest(x), Set())
@@ -97,7 +99,7 @@ object Holder {
 
   //Data type for holding materials, their content and settings.
   class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-    val info = (for (x ← 0 until sourceTest.size) yield sourceTest(x) + "\n").mkString
+    val info = (for (x <- 0 until sourceTest.size) yield sourceTest(x) + "\n").mkString
     override val nivel: Int = level
     override val nume: String = name
 
@@ -120,8 +122,8 @@ object Holder {
 
   private[this] def runCheckings(): Unit = {
     println; println; println; println("COMMENCING")
-    for ((k, v) ← users) println(k + " --> " + v)
-    for ((k, v) ← settings) println(k + " --> " + v)
+    for ((k, v) <- users) println(k + " --> " + v)
+    for ((k, v) <- settings) println(k + " --> " + v)
 
     println(currentUser)
     println(currentModule)

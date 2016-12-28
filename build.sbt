@@ -41,4 +41,4 @@ SbtScalariform.scalariformSettings
 ScalariformKeys.preferences := ScalariformKeys.preferences.value
 	.setPreference(AlignSingleLineCaseStatements, true)
 	.setPreference(DoubleIndentClassDeclaration, true)
-	.setPreference(RewriteArrowSymbols, true)
+	.setPreference(RewriteArrowSymbols, false)
