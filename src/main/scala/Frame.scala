@@ -1,21 +1,20 @@
 package Draconis.romana
 
-import scala.language.postfixOps
 import scala.swing._
 import scala.swing.event._
 import scala.util.Random
-import java.awt.Color
+import java.awt.{ Color, Point, BasicStroke }
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 import scala.collection.mutable.Set
 
 object Frame {
-  private[this] var loginFr: loginFrame = null
-  private[this] var registerFr: registerFrame = null
+  private[this] var loginFr: loginFrame = _
+  private[this] var registerFr: registerFrame = _
 
-  private[this] var moduleFr: moduleFrame = null
-  private[this] var elevFr: elevFrame = null
+  private[this] var moduleFr: moduleFrame = _
+  private[this] var elevFr: elevFrame = _
 
-  private[this] var teacherFr: teacherFrame = null
+  private[this] var teacherFr: teacherFrame = _
 
   private[this] val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
@@ -130,7 +129,7 @@ object Frame {
   class testFrame(source: Holder.Test) extends MainFrame {
     title = source.nume
     resizable = true
-    preferredSize = new Dimension(640, 480)
+    preferredSize = new Dimension(800, 600)
 
     import scala.collection.mutable.ListBuffer
 
@@ -192,46 +191,22 @@ object Frame {
             for (alfa <- x.exercitii)
               dragDrops = (new ToggleButton(alfa._1), new ToggleButton(alfa._2)) :: dragDrops
 
-            val left = Random.shuffle(dragDrops.map(_._1)toList)
-            val right = Random.shuffle(dragDrops.map(_._2)toList)
+            val left = Random.shuffle(dragDrops.map(x => x._1).toList.filter(x => x.text != "Null"))
+            val right = Random.shuffle(dragDrops.map(x => x._2).toList.filter(x => x.text != "Null"))
 
             def checkOut(l: ToggleButton, r: ToggleButton): Unit = {
-              leftToRight.filter(x => x._1 == l || x._2 == r)
+              leftToRight = leftToRight.filter(x => x._1 != l && x._2 != r)
             }
 
             val leftPanel = new BoxPanel(Orientation.Vertical) {
               name = "LeftPanel"
               contents += Swing.VStrut(5)
               left.foreach(x => {
-                if (x.text != "Null") {
-                  contents += x
-                  contents += Swing.VStrut(5)
+                contents += x
+                contents += Swing.VStrut(5)
 
-                  listenTo(x)
-                }
+                listenTo(x)
               })
-
-              reactions += {
-                case ButtonClicked(b) => b match {
-                  case button: ToggleButton => {
-                    if (button.selected) {
-                      left.foreach(x => {
-                        if (x != button)
-                          x.selected = false
-                      })
-                      right.foreach(y => {
-                        if (y.selected) {
-                          leftToRight += (button -> y)
-                          y.selected = false
-                          button.selected = false
-                          checkOut(button, y)
-                        }
-                      })
-                    }
-                  }
-                }
-                case _ => {}
-              }
             }
             restrictSize(leftPanel)
 
@@ -239,42 +214,93 @@ object Frame {
               name = "RightPanel"
               contents += Swing.VStrut(5)
               right.foreach(x => {
-                if (x.text != "Null") {
-                  contents += x
-                  contents += Swing.VStrut(5)
+                contents += x
+                contents += Swing.VStrut(5)
 
-                  listenTo(x)
-                }
+                listenTo(x)
               })
-
-              reactions += {
-                case ButtonClicked(b) => b match {
-                  case button: ToggleButton => {
-                    if (button.selected) {
-                      right.foreach(x => {
-                        if (x != button)
-                          x.selected = false
-                      })
-                      left.foreach(y => {
-                        if (y.selected) {
-                          leftToRight += (y -> button)
-                          y.selected = false
-                          button.selected = false
-                          checkOut(y, button)
-                        }
-                      })
-                    }
-                  }
-                }
-                case _ => {}
-              }
-
             }
             restrictSize(rightPanel)
 
+            val panou = new Panel {
+              preferredSize = {
+                if (leftPanel.preferredSize.height > rightPanel.preferredSize.height)
+                  new Dimension(200, leftPanel.preferredSize.height)
+                else new Dimension(200, rightPanel.preferredSize.height)
+              }
+
+              val leftPoints = left.map(x => (x.text -> new Point(0, x.location.getY.toInt)))
+              val rightPoints = right.map(x => (x.text -> new Point(180, x.location.getY.toInt)))
+
+              override def paintComponent(g: Graphics2D): Unit = {
+                g.clearRect(0, 0, size.width, size.height)
+
+                g.setColor(Color.white)
+                g.fillRect(0, 0, size.width, size.height)
+
+                g.setColor(Color.black)
+                left.foreach(x => g.fillOval(0, x.location.getY.toInt, 12, 12))
+                right.foreach(x => g.fillOval(180, x.location.getY.toInt, 12, 12))
+
+                g.setStroke(new BasicStroke(4))
+                leftToRight.foreach(x => {
+                  g.drawLine(6, x._1.location.getY.toInt + 6, 186, x._2.location.getY.toInt + 6)
+                })
+              }
+
+            }
+            restrictSize(panou)
+
+            rightPanel.reactions += {
+              case ButtonClicked(b) => b match {
+                case button: ToggleButton => {
+                  if (button.selected) {
+                    right.foreach(x => {
+                      if (x != button)
+                        x.selected = false
+                    })
+                    left.foreach(y => {
+                      if (y.selected) {
+                        checkOut(y, button)
+                        leftToRight += (y -> button)
+                        y.selected = false
+                        button.selected = false
+                      }
+                    })
+                  }
+                  panou.repaint
+                }
+              }
+              case _ => {}
+            }
+            leftPanel.reactions += {
+              case ButtonClicked(b) => b match {
+                case button: ToggleButton => {
+                  if (button.selected) {
+                    left.foreach(x => {
+                      if (x != button)
+                        x.selected = false
+                    })
+                    right.foreach(y => {
+                      if (y.selected) {
+                        checkOut(button, y)
+                        leftToRight += (button -> y)
+                        y.selected = false
+                        button.selected = false
+                      }
+                    })
+                  }
+                  panou.repaint
+                }
+              }
+              case _ => {}
+            }
+
             contents += new BoxPanel(Orientation.Horizontal) {
               contents += leftPanel
-              contents += Swing.HStrut(25)
+              contents += Swing.HStrut(15)
+              contents += panou
+              contents += Swing.HStrut(15)
               contents += rightPanel
             }
           }
@@ -580,6 +606,7 @@ object Frame {
 
   private[this] def restrictButton(s: ToggleButton): Unit = {
     s.preferredSize = new Dimension(125, s.preferredSize.height)
+    s.minimumSize = new Dimension(125, s.preferredSize.height)
   }
 
 }

@@ -90,7 +90,5 @@ object Core {
       b <- leftRights
       if (a == b)
     } yield a)
-
-    something foreach println
   }
 }
