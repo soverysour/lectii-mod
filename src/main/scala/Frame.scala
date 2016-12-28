@@ -137,6 +137,7 @@ object Frame {
     private[this] var emptySpaces = List[(String, TextField)]()
     private[this] var checkBoxes = ListBuffer[List[(Boolean, CheckBox)]]()
     private[this] var dragDrops = List[(ToggleButton, ToggleButton)]()
+    private[this] var leftToRight = ListBuffer[(ToggleButton, ToggleButton)]()
 
     contents = new ScrollPane {
       contents = new BoxPanel(Orientation.Vertical) {
@@ -194,6 +195,10 @@ object Frame {
             val left = Random.shuffle(dragDrops.map(_._1)toList)
             val right = Random.shuffle(dragDrops.map(_._2)toList)
 
+            def checkOut(l: ToggleButton, r: ToggleButton): Unit = {
+              leftToRight.filter(x => x._1 == l || x._2 == r)
+            }
+
             val leftPanel = new BoxPanel(Orientation.Vertical) {
               name = "LeftPanel"
               contents += Swing.VStrut(5)
@@ -207,12 +212,26 @@ object Frame {
               })
 
               reactions += {
-                case ButtonClicked(button) => {
-
+                case ButtonClicked(b) => b match {
+                  case button: ToggleButton => {
+                    if (button.selected) {
+                      left.foreach(x => {
+                        if (x != button)
+                          x.selected = false
+                      })
+                      right.foreach(y => {
+                        if (y.selected) {
+                          leftToRight += (button -> y)
+                          y.selected = false
+                          button.selected = false
+                          checkOut(button, y)
+                        }
+                      })
+                    }
+                  }
                 }
                 case _ => {}
               }
-
             }
             restrictSize(leftPanel)
 
@@ -229,8 +248,23 @@ object Frame {
               })
 
               reactions += {
-                case ButtonClicked(button) => {
-
+                case ButtonClicked(b) => b match {
+                  case button: ToggleButton => {
+                    if (button.selected) {
+                      right.foreach(x => {
+                        if (x != button)
+                          x.selected = false
+                      })
+                      left.foreach(y => {
+                        if (y.selected) {
+                          leftToRight += (y -> button)
+                          y.selected = false
+                          button.selected = false
+                          checkOut(y, button)
+                        }
+                      })
+                    }
+                  }
                 }
                 case _ => {}
               }
@@ -272,17 +306,20 @@ object Frame {
       )
 
       if (b == Dialog.Result.Ok) {
-        var newSpaces = emptySpaces.map(x => (x._1, x._2.text))
+        val newSpaces = emptySpaces.map(x => (x._1, x._2.text))
 
         var newChecks = List[List[(Boolean, Boolean)]]()
         checkBoxes.foreach(x => {
           newChecks = x.map(y => (y._1, y._2.selected)) :: newChecks
         })
 
+        val leftRights = leftToRight.map(x => (x._1.text, x._2.text)).toList
+        val actualRights = dragDrops.map(x => (x._1.text, x._2.text))
+
         close
         elevFr.visible = true
 
-        Core.evaluate(newSpaces, newChecks)
+        Core.evaluate(newSpaces, newChecks, leftRights, actualRights)
       }
     }
 

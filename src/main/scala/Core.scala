@@ -66,7 +66,8 @@ object Core {
     filter(_.isDirectory).toList.map(_.getName)
 
   //Evaluates the results of a test.
-  def evaluate(newSpaces: List[(String, String)], newChecks: List[List[(Boolean, Boolean)]]): Unit = {
+  def evaluate(newSpaces: List[(String, String)], newChecks: List[List[(Boolean, Boolean)]],
+    leftRights: List[(String, String)], actualRights: List[(String, String)]): Unit = {
     newSpaces.foreach(x => {
       var k = false
       x._1.split(",").foreach(y => {
@@ -83,5 +84,13 @@ object Core {
       })
       println(k)
     })
+
+    val something = (for {
+      a <- actualRights
+      b <- leftRights
+      if (a == b)
+    } yield a)
+
+    something foreach println
   }
 }
