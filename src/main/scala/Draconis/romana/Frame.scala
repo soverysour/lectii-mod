@@ -3,9 +3,9 @@ package Draconis.romana
 import scala.swing._
 import scala.swing.event._
 import scala.util.Random
-import java.awt.{ Color, Point, BasicStroke }
+import java.awt.{ Color, BasicStroke }
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
-import scala.collection.mutable.Set
+import scala.collection.mutable.{ Set, ListBuffer }
 
 object Frame {
   private[this] var loginFr: loginFrame = _
@@ -18,20 +18,16 @@ object Frame {
 
   private[this] val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
-  //Load the login frame and initiate the loading of the users and their credentials.
-  def main(args: Array[String]): Unit = {
-    Core.initUsers
+  def initial(): Unit = {
     loginFr = new loginFrame
   }
 
-  //This is what happens when someone succesfully logs in.
   private[this] def commence(): Unit = {
     loginFr.close
     if (Holder.getUser.isElev) moduleFr = new moduleFrame
     else teacherFr = new teacherFrame
   }
 
-  //The "pick a module" frame.
   class moduleFrame extends MainFrame {
     title = "Choose your module"
     resizable = false
@@ -61,7 +57,6 @@ object Frame {
     visible = true
   }
 
-  //The frame a student sees after picking a module.
   class elevFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
@@ -125,17 +120,13 @@ object Frame {
     }
   }
 
-  //An opened test.
   class testFrame(source: Holder.Test) extends MainFrame {
     title = source.nume
     resizable = true
     preferredSize = new Dimension(800, 600)
 
-    import scala.collection.mutable.ListBuffer
-
     private[this] var emptySpaces = List[(String, TextField)]()
-    private[this] var checkBoxes = ListBuffer[List[(Boolean, CheckBox)]]()
-    private[this] var dragDrops = List[(ToggleButton, ToggleButton)]()
+    private[this] var checkBoxes = ListBuffer[(String, List[CheckBox])]()
     private[this] var leftToRight = ListBuffer[(ToggleButton, ToggleButton)]()
 
     contents = new ScrollPane {
@@ -149,7 +140,7 @@ object Frame {
             for (alfa <- x.exercitii) {
               contents += new Label(alfa._1)
               contents += Swing.VStrut(5)
-              emptySpaces = (alfa._2, new TextField) :: emptySpaces
+              emptySpaces = (alfa._1, new TextField) :: emptySpaces
 
               emptySpaces(0)._2.text = "O variantaasdfasdasdasdas"
               restrictSize(emptySpaces(0)._2)
@@ -168,15 +159,15 @@ object Frame {
               contents += Swing.VStrut(5)
 
               contents += new BoxPanel(Orientation.Horizontal) {
-                checkBoxes.+=:(List())
+                checkBoxes.+=:(alfa._1 -> List())
                 for (ceva <- alfa._2.split(",")) {
                   if (ceva.endsWith("#")) {
-                    checkBoxes(0) = (true, new CheckBox(ceva.dropRight(1) + " ;")) :: checkBoxes(0)
-                    contents += checkBoxes(0)(0)._2
+                    checkBoxes(0) = (checkBoxes(0)._1 -> (new CheckBox(ceva.dropRight(1)) :: checkBoxes(0)._2))
+                    contents += checkBoxes(0)._2(0)
                     contents += Swing.HStrut(5)
                   } else {
-                    checkBoxes(0) = (false, new CheckBox(ceva + " ;")) :: checkBoxes(0)
-                    contents += checkBoxes(0)(0)._2
+                    checkBoxes(0) = (checkBoxes(0)._1 -> (new CheckBox(ceva) :: checkBoxes(0)._2))
+                    contents += checkBoxes(0)._2(0)
                     contents += Swing.HStrut(5)
                   }
                 }
@@ -187,6 +178,9 @@ object Frame {
           } else if (x.tip == "D##D") {
             contents += new Label("Alege, pentru fiecare element din stanga, elementul din dreapta corespunzator")
             contents += Swing.VStrut(10)
+
+
+            var dragDrops = List[(ToggleButton, ToggleButton)]()
 
             for (alfa <- x.exercitii)
               dragDrops = (new ToggleButton(alfa._1), new ToggleButton(alfa._2)) :: dragDrops
@@ -334,18 +328,17 @@ object Frame {
       if (b == Dialog.Result.Ok) {
         val newSpaces = emptySpaces.map(x => (x._1, x._2.text))
 
-        var newChecks = List[List[(Boolean, Boolean)]]()
+        var newChecks = List[(String, List[(String, Boolean)])]()
         checkBoxes.foreach(x => {
-          newChecks = x.map(y => (y._1, y._2.selected)) :: newChecks
+          newChecks = (x._1 -> x._2.map(y => (y.text, y.selected))) :: newChecks
         })
 
         val leftRights = leftToRight.map(x => (x._1.text, x._2.text)).toList
-        val actualRights = dragDrops.map(x => (x._1.text, x._2.text))
 
         close
         elevFr.visible = true
 
-        Core.evaluate(newSpaces, newChecks, leftRights, actualRights)
+        Core.evaluate(newSpaces, newChecks, leftRights, title)
       }
     }
 
@@ -353,7 +346,6 @@ object Frame {
     visible = true
   }
 
-  //An opened material.
   class materialFrame(source: Holder.Lectura) extends MainFrame {
     title = source.nume
     resizable = false
@@ -377,7 +369,6 @@ object Frame {
     visible = true
   }
 
-  //An opened gallery entry.
   class galleryFrame(source: Holder.Gallery) extends MainFrame {
     title = source.nume
     resizable = false
@@ -389,7 +380,6 @@ object Frame {
     visible = true
   }
 
-  //Teacher's frame.
   class teacherFrame extends MainFrame {
     title = "Admin"
     preferredSize = new Dimension(800, 600)
@@ -399,7 +389,6 @@ object Frame {
     visible = true
   }
 
-  //The registration frame.
   class registerFrame extends MainFrame {
     title = "Register"
     preferredSize = new Dimension(220, 290)
@@ -538,7 +527,6 @@ object Frame {
     override def closeOperation = { back }
   }
 
-  //The login frame.
   class loginFrame extends MainFrame {
     title = "Login or Register"
     preferredSize = new Dimension(280, 150)

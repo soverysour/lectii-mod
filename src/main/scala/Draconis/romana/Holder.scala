@@ -5,14 +5,13 @@ import scala.collection.mutable.{ Map, Set }
 object Holder {
   private[this] var users: Map[String, Cont] = Map[String, Cont]()
   private[this] var settings: Map[String, String] = Map[String, String]()
-  private[this] var currentUser: Cont = null
-  private[this] var currentModule: String = ""
+  private[this] var currentUser: Cont = _
+  private[this] var currentModule: String = _
 
   private[this] var info: Set[Lectura] = Set[Lectura]()
   private[this] var tests: Set[Test] = Set[Test]()
   private[this] var gallery: Set[Gallery] = Set[Gallery]()
 
-  //Load all the profiles into the users map. This is always done regardless of chosen Module.
   def loadUsers(profiles: IndexedSeq[String]): Unit = {
     profiles.foreach(x => {
       val e = x.split("[,]")
@@ -20,7 +19,6 @@ object Holder {
     })
   }
 
-  //All sorts of getters / setters.
   def setModule(m: String): Unit = { currentModule = m }
   def getModule: String = currentModule
   def getUser: Cont = currentUser
@@ -32,12 +30,10 @@ object Holder {
     catch { case _: Throwable => "" }
   }
 
-  //Getters for info, sets and gallery entries.
   def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
   def getTests: List[Test] = tests.toList.sortWith(sortElem)
   def getGallery: List[Gallery] = gallery.toList.sortWith(sortElem)
 
-  //Exact getters for info, sets and gallery entries.
   def getExactInfo(name: String): Option[Lectura] = {
     info.foreach(x => if (x.nume == name) return Some(x))
     None
@@ -55,19 +51,16 @@ object Holder {
   def addTest(i: IndexedSeq[String], nu: String, ni: Int): Unit = { tests += new Test(i, nu, ni) }
   def addGallery(nu: String, ni: Int): Unit = { gallery += new Gallery(nu, ni) }
 
-  //Sorting method for materials, tests and gallery entries.
   private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
     if (x1.nivel == x2.nivel) x1.nume < x2.nume
     else x1.nivel < x2.nivel
   }
 
-  //To facilitate sorting.
   sealed trait ToSort {
     val nivel: Int
     val nume: String
   }
 
-  //Data type for holding tests, their content and their settings.
   class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
     sealed class Exercitiu(gen: String, val ex: Set[String]) {
       override def toString: String = {
@@ -97,7 +90,6 @@ object Holder {
     }
   }
 
-  //Data type for holding materials, their content and settings.
   class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
     val info = (for (x <- 0 until sourceTest.size) yield sourceTest(x) + "\n").mkString
     override val nivel: Int = level
@@ -106,13 +98,11 @@ object Holder {
     override def toString: String = name + level + info
   }
 
-  //Data structure for holding gallery entrances.
   class Gallery(val name: String, val level: Int) extends ToSort {
     override val nivel: Int = level
     override val nume: String = name
   }
 
-  //Data type that holds both students and admin level account details.
   class Cont(val username: String, val parola: String, val nume: String, val prenume: String,
       val scoala: String, val opttext: String, val isElev: Boolean) {
 

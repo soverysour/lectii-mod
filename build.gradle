@@ -1,16 +1,15 @@
 apply plugin: 'java'
 apply plugin: 'scala'
 
+description = "Gradle Version = ${gradle.gradleVersion}"
+
 repositories {
   mavenCentral()
-  jcenter()
 }
 
 dependencies {
   compile 'org.scala-lang:scala-library-all:2.12.0'
-  compile 'org.scalacheck:scalacheck_2.12:1.13.4'
-  compile 'org.scalactic:scalactic_2.12:3.0.1'
-  compile 'org.scalatest:scalatest_2.12:3.0.1'
+  compile 'commons-io:commons-io:2.5'
 }
 
 tasks.withType(ScalaCompile) {
@@ -20,22 +19,22 @@ tasks.withType(ScalaCompile) {
   }
   scalaCompileOptions.additionalParameters = ['-target:jvm-1.8',
   '-deprecation', '-encoding', 'UTF-8', 'feature', 'language:existentials',
-  '-language:higherKinds', '-language:implicitConversions', '-language:experimental.macros', 
+  '-language:higherKinds', '-language:implicitConversions', '-language:experimental.macros',
   '-unchecked', '-Ywarn-unused-import', '-Ywarn-nullary-unit', '-Xfatal-warnings', '-Xlint',
   '-Ywarn-dead-code', '-Xfuture' ]
 }
 
 jar {
   from configurations.compile.collect { zipTree it }
-  manifest.attributes 'Main-Class': 'Draconis.romana.Frame'
+  manifest.attributes 'Main-Class': 'Draconis.romana.Core'
 }
 
 task run(type: JavaExec, dependsOn: classes) {
-  main 'Draconis.romana.Frame'
+  main 'Draconis.romana.Core'
   classpath sourceSets.main.runtimeClasspath
 }
 
-task runJar(type: Exec, dependsOn: jar) { 
+task runJar(type: Exec, dependsOn: jar) {
   executable 'java'
   args '-jar', "$jar.archivePath"
 }
