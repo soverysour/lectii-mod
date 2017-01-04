@@ -592,9 +592,4 @@ object Frame {
     s.maximumSize = new Dimension(s.preferredSize.width, s.preferredSize.height)
   }
 
-  private[this] def restrictButton(s: ToggleButton): Unit = {
-    s.preferredSize = new Dimension(125, s.preferredSize.height)
-    s.minimumSize = new Dimension(125, s.preferredSize.height)
-  }
-
 }
