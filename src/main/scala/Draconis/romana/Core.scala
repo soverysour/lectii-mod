@@ -1,16 +1,18 @@
 package Draconis.romana
 
 import org.apache.commons.io.FileUtils
+import java.io.File
 
 object Core {
-
-  type File = java.io.File
 
   private[this] def readF(path: String): IndexedSeq[String] = FileUtils.
     readFileToString(new File(path),"UTF-8").split("\n").toIndexedSeq
 
   private[this] def writeF(path: String, data: String, app: Boolean): Unit = FileUtils.
     write(new File(path), data, "UTF-8", app)
+
+  def getModules: IndexedSeq[String] =
+    readF(System.getProperty("user.home") + "/Draconis/modules.txt")
 
   def main(args: Array[String]): Unit = {
     Holder.loadUsers(readF(System.getProperty("user.home") + "/Draconis/users.txt"))
@@ -45,14 +47,18 @@ object Core {
     writeF(System.getProperty("user.home") + "/Draconis/users.txt", link + "\n", true)
   }
 
-  def getModules: IndexedSeq[String] =
-    readF(System.getProperty("user.home") + "/Draconis/modules.txt")
-
   def evaluate(newSp: List[(String, String)], newCh: List[(String, List[(String, Boolean)])],
     leftRi: List[(String, String)], id: String): Unit = {
     val path = System.getProperty("user.home") + "/Draconis/" + Holder.getModule + "/"
+    val u =  Holder.getUser.username
+    var xx = 0
+    readF(path + "dictionary.txt").foreach( x => if (x contains id) xx += 1 )
+
     var brute = ""
-    var score = ""
+
+    var total = 0
+    var score = 0
+
 
     val ultCh = newCh.map( x => {
       x._1 -> x._2.map( y => {
@@ -60,9 +66,11 @@ object Core {
         else y._1
       })
     })
+    val nor = Holder.getExactTest(id)
 
-    Holder.getExactTest(id) match {
+    nor match {
       case Some(x) =>
+        total = x.puncte
         for ( alfa <- x.problems ){
           if ( alfa.tip == "C##E" ){
             for {
@@ -70,17 +78,22 @@ object Core {
               ss <- newSp
               if ss._1 == beta._1
               if ss._2 != ""
-            } if ( beta._2.split("[,]").map(_.toLowerCase.trim ) contains ss._2.toLowerCase.trim )
-            brute = brute + "V:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
-            else brute = brute + "P:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
+            } if ( beta._2.split("[,]").map(_.toLowerCase.trim ) contains ss._2.toLowerCase.trim ){
+              brute = brute + "C##E:V:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
+              score += alfa.score / alfa.exercitii.size
+            }
+            else brute = brute + "C##E:P:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
           }
           else if ( alfa.tip == "D##D" ){
             for {
               beta <- alfa.exercitii
               ss <- leftRi
               if beta._1 == ss._1
-            } if ( beta._2 == ss._2 ) brute = brute + "V:" + beta._1 + "##" + ss._2 + "\n"
-            else brute = brute + "P:" + beta._1 + "##" + ss._2 + "\n"
+            } if ( beta._2 == ss._2 ){
+              brute = brute + "D##D:V:" + beta._1 + "##" + ss._2 + "\n"
+              score += alfa.score / alfa.exercitii.size
+            }
+            else brute = brute + "D##D:P:" + beta._1 + "##" + ss._2 + "\n"
           }
           else if ( alfa.tip == "C##V" ){
             for {
@@ -90,20 +103,41 @@ object Core {
             } for {
               gamma <- ss._2
             } if ( beta._2.split("[,]") contains gamma )
-            brute = brute + "V:" + beta._1 + "##" + gamma + "\n"
-            else brute = brute + "P:" + beta._1 + "##" + gamma + "\n"
+            brute = brute + "C##V:V:" + beta._1 + "##" + gamma + "\n"
+            else brute = brute + "C##V:P:" + beta._1 + "##" + gamma + "\n"
           }
         }
       case None => {}
     }
 
-    var xx = 0
-    readF(path + "dictionary.txt").foreach( x => if ( x contains id ) xx += 1 )
+    var toCheck = List[String]()
+    brute.split("\n").foreach( x => {
+      if ( x.startsWith("C##V:V:") && !toCheck.contains(x.drop(7).split("##")(0)) ){
+        toCheck = x.drop(7).split("##")(0) :: toCheck
+      }
+    })
 
-    val u =  Holder.getUser.username
+    toCheck.foreach( x => {
+      var good = true
+      brute.split("\n").foreach( y => {
+        if ((y contains x) && (y contains "C##V:P:")) good = false
+      })
+      if ( good ){
+        nor match {
+          case Some(z) =>
+            for {
+              alfa <- z.problems
+              beta <- alfa.exercitii
+              if beta._1 == x
+            } score += alfa.score / alfa.exercitii.size
+          case None => {}
+        }
+      }
+    })
 
-    writeF(path + "dictionary.txt", s"T:${id}:${xx}:${score}:${u}\n", true)
-    writeF(path + "/progress/" + s"${id}-${xx}-${u}", brute + "\n\n" + score, false)
+    val secTot = s"${score}/${total}"
+    writeF(path + "dictionary.txt", s"T-${id}-${xx}-${u}-${secTot}\n", true)
+    writeF(path + "/progress/" + s"T-${id}-${xx}-${u}-${score}-${total}", s"${brute}\n\n${secTot}", false)
   }
 
 }

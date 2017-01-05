@@ -62,40 +62,35 @@ object Holder {
   }
 
   class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-    sealed class Exercitiu(gen: String, val ex: Set[String]) {
-      override def toString: String = {
-        ex foreach println
-        tip
-      }
 
+    sealed class Exercitiu(gen: String, val ex: Set[String], sc: String) {
       val tip = gen
       val exercitii = for (x <- ex) yield (x.split("##")(0), x.split("##")(1))
+      val score = sc.toInt
     }
+
     private[this] var subiect = Set[Exercitiu]()
-    private[this] var exer = new Exercitiu("#", Set())
+    private[this] var exer = new Exercitiu("#", Set(), "0")
+    private[this] var pp = 0
+
     for (x <- 0 until sourceTest.size) {
-      if (sourceTest(x) == "##") subiect += new Exercitiu(exer.tip, exer.ex)
+      if (sourceTest(x).startsWith("##")) subiect += new Exercitiu(exer.tip, exer.ex, sourceTest(x).drop(2))
       else if (sourceTest(x).replaceFirst("[CD]##[EDV]", "#") == "#")
-        exer = new Exercitiu(sourceTest(x), Set())
-      else exer = new Exercitiu(exer.tip, exer.ex + sourceTest(x))
+        exer = new Exercitiu(sourceTest(x), Set(), "0")
+      else exer = new Exercitiu(exer.tip, exer.ex + sourceTest(x), "0")
     }
+    subiect.foreach(pp += _.score)
 
     val problems = subiect
+    val puncte = pp
     override val nivel: Int = level
     override val nume: String = name
-
-    override def toString: String = {
-      problems foreach println
-      name + level
-    }
   }
 
   class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
     val info = (for (x <- 0 until sourceTest.size) yield sourceTest(x) + "\n").mkString
     override val nivel: Int = level
     override val nume: String = name
-
-    override def toString: String = name + level + info
   }
 
   class Gallery(val name: String, val level: Int) extends ToSort {
@@ -104,23 +99,5 @@ object Holder {
   }
 
   class Cont(val username: String, val parola: String, val nume: String, val prenume: String,
-      val scoala: String, val opttext: String, val isElev: Boolean) {
-
-    override def toString: String = username + " " + parola + " " + nume + " " +
-      prenume + " " + scoala + " " + opttext + " " + isElev
-  }
-
-  private[this] def runCheckings(): Unit = {
-    println; println; println; println("COMMENCING")
-    for ((k, v) <- users) println(k + " --> " + v)
-    for ((k, v) <- settings) println(k + " --> " + v)
-
-    println(currentUser)
-    println(currentModule)
-
-    info foreach println
-    tests foreach println
-
-    println; println; println; println("OVER")
-  }
+    val scoala: String, val opttext: String, val isElev: Boolean)
 }
