@@ -2,8 +2,11 @@ package Draconis.romana
 
 import org.apache.commons.io.FileUtils
 import java.io.File
+import scala.collection.mutable.ListBuffer
 
 object Core {
+
+  private[this] val home = System.getProperty("user.home") + "/Draconis/"
 
   private[this] def readF(path: String): IndexedSeq[String] = FileUtils.
     readFileToString(new File(path),"UTF-8").split("\n").toIndexedSeq
@@ -12,21 +15,21 @@ object Core {
     write(new File(path), data, "UTF-8", app)
 
   def getModules: IndexedSeq[String] =
-    readF(System.getProperty("user.home") + "/Draconis/modules.txt")
+    readF(home + "modules.txt")
 
   def main(args: Array[String]): Unit = {
-    Holder.loadUsers(readF(System.getProperty("user.home") + "/Draconis/users.txt"))
+    Holder.loadUsers(readF(home + "users.txt"))
     Frame.initial
   }
 
   def initModule(s: String): Unit = {
     Holder.setModule(s)
 
-    readF(System.getProperty("user.home") + "/Draconis/" + s + "/settings.txt").foreach(x => {
+    readF(home + s + "/settings.txt").foreach(x => {
       val Array(s1, s2, s3) = x.split("[=]")
       if (s1 == "1") Holder.setSettings(s2 -> s3)
       else {
-        val path = System.getProperty("user.home") + "/Draconis/" + s
+        val path = home + s
         val (one, two) = (s3.split("[,]")(0), s3.split("[,]")(1).toInt)
         if (s1 == "2")
           Holder.addLectura(readF(path + "/material/" + s2), one, two)
@@ -36,6 +39,8 @@ object Core {
           Holder.addGallery(one, two)
       }
     })
+
+    calculateStats
   }
 
   def register(us: String, pa: String, nu: String, pr: String, sc: String,
@@ -44,21 +49,19 @@ object Core {
     val link = s"$us,$pa,$nu,$pr,$sc,$opt,$sp"
 
     Holder.loadUsers(IndexedSeq(link))
-    writeF(System.getProperty("user.home") + "/Draconis/users.txt", link + "\n", true)
+    writeF(home + "users.txt", link + "\n", true)
   }
 
   def evaluate(newSp: List[(String, String)], newCh: List[(String, List[(String, Boolean)])],
     leftRi: List[(String, String)], id: String): Unit = {
-    val path = System.getProperty("user.home") + "/Draconis/" + Holder.getModule + "/"
+    val path = home + Holder.getModule + "/"
     val u =  Holder.getUser.username
     var xx = 0
-    readF(path + "dictionary.txt").foreach( x => if (x contains id) xx += 1 )
-
+    var total: Double = 0
+    var score: Double = 0
     var brute = ""
 
-    var total = 0
-    var score = 0
-
+    readF(path + "dictionary.txt").foreach( x => if (x contains id) xx += 1 )
 
     val ultCh = newCh.map( x => {
       x._1 -> x._2.map( y => {
@@ -66,8 +69,8 @@ object Core {
         else y._1
       })
     })
+    
     val nor = Holder.getExactTest(id)
-
     nor match {
       case Some(x) =>
         total = x.puncte
@@ -136,8 +139,47 @@ object Core {
     })
 
     val secTot = s"${score}/${total}"
-    writeF(path + "dictionary.txt", s"T-${id}-${xx}-${u}-${secTot}\n", true)
-    writeF(path + "/progress/" + s"T-${id}-${xx}-${u}-${score}-${total}", s"${brute}\n\n${secTot}", false)
+    writeF(s"${path}dictionary.txt", s"T#${id}#${xx}#${u}#${secTot}\n", true)
+    writeF(s"${path}/progress/T--${id}--${xx}--${u}", brute, false)
+
+    calculateStats
+  }
+
+  private[this] def calculateStats(): Unit = {
+    val finals = ListBuffer[String]()
+    val entries: ListBuffer[String] = readF(s"${home}${Holder.getModule}/dictionary.txt").
+      to[ListBuffer].filter(_ != "").filter(_.split("#")(3) == Holder.getUser.username)
+
+    for ( alfa <- 0 until entries.size ){
+      var suite = entries(alfa)
+      for ( beta <- alfa + 1 until entries.size ){
+        if ( entries(beta).split("#")(1) == suite.split("#")(1) &&
+          (entries(beta).split("#")(4).split("[/]")(0).toDouble >
+          suite.split("#")(4).split("[/]")(0).toDouble) )
+
+          suite = entries(beta)
+      }
+
+      var toGive = true
+      for ( c <- finals ) if ( c.split("#")(1) == suite.split("#")(1) ) toGive = false
+      if ( toGive ) finals += suite
+    }
+
+    val percent: Double = finals.size.toDouble / Holder.getTests.size.toDouble * 100.0
+    val scores = finals.map( y => {
+      val c = y.split("#")(4).split("[/]")
+      (c(0).toDouble / c(1).toDouble * 100.0)
+    })
+    var sum: Double = 0.0
+    var n: Double = 0.0
+    scores.foreach( x => {
+      sum += x
+      n += 1
+    })
+
+    val tempo = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
+    Holder.setStats(percent.toString, tempo)
+    Frame.refreshElev
   }
 
 }

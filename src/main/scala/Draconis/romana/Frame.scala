@@ -8,27 +8,27 @@ import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 import scala.collection.mutable.{ Set, ListBuffer }
 
 object Frame {
-  private[this] var loginFr: loginFrame = _
-  private[this] var registerFr: registerFrame = _
+  private[this] var loginFr: LoginFrame = _
+  private[this] var registerFr: RegisterFrame = _
 
-  private[this] var moduleFr: moduleFrame = _
-  private[this] var elevFr: elevFrame = _
+  private[this] var moduleFr: ModuleFrame = _
+  private[this] var elevFr: ElevFrame = _
 
-  private[this] var teacherFr: teacherFrame = _
+  private[this] var teacherFr: TeacherFrame = _
 
   private[this] val lid: String = getPas + "7Dra8" // XDvCSSCvDX7Dra8
 
-  def initial(): Unit = {
-    loginFr = new loginFrame
-  }
-
   private[this] def commence(): Unit = {
     loginFr.close
-    if (Holder.getUser.isElev) moduleFr = new moduleFrame
-    else teacherFr = new teacherFrame
+    if (Holder.getUser.isElev) moduleFr = new ModuleFrame
+    else teacherFr = new TeacherFrame
   }
 
-  class moduleFrame extends MainFrame {
+  def initial(): Unit = loginFr = new LoginFrame
+
+  def refreshElev(): Unit = elevFr.refresh
+
+  class ModuleFrame extends MainFrame {
     title = "Choose your module"
     resizable = false
     private[this] var asdf: Set[Button] = Set[Button]()
@@ -50,19 +50,27 @@ object Frame {
 
     private[this] def sweep(a: String): Unit = {
       close
-      elevFr = new elevFrame(a)
+      elevFr = new ElevFrame(a)
     }
 
     centerOnScreen
     visible = true
   }
 
-  class elevFrame(a: String) extends MainFrame {
+  class ElevFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
     title = Holder.getSettings("titlu")
-    resizable = false
+    resizable = true
     preferredSize = new Dimension(400, 300)
+
+    var nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
+    var proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
+
+    def refresh(): Unit = {
+      proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
+      nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
+    }
 
     val stuff = new TabbedPane() {
       pages += new TabbedPane.Page("Materiale", new FlowPanel {
@@ -86,8 +94,29 @@ object Frame {
         border = Swing.EmptyBorder(15, 15, 15, 15)
         background = Color.gray
       })
-      pages += new TabbedPane.Page("Profil", new FlowPanel {
-
+      pages += new TabbedPane.Page("Profil", new BoxPanel(Orientation.Horizontal) {
+        contents += new BoxPanel(Orientation.Vertical){
+          val s = Holder.getUser
+          val t = Swing.VStrut(5)
+          contents += t
+          contents += new Label(s"Utilizator: ${s.username}")
+          contents += t
+          contents += new Label(s"Nume: ${s.nume}")
+          contents += t
+          contents += new Label(s"Prenume: ${s.prenume}")
+          contents += t
+          contents += new Label(s"Scoala: ${s.scoala}")
+          contents += t
+          contents += new Label(s"Clasa: ${s.opttext}")
+          contents += t
+        }
+        contents += new BoxPanel(Orientation.Vertical){
+          contents += Swing.VStrut(10)
+          contents += proc
+          contents += Swing.VStrut(10)
+          contents += nMed
+          contents += Swing.VStrut(10)
+        }
         border = Swing.EmptyBorder(15, 15, 15, 15)
         background = Color.gray
       })
@@ -380,7 +409,7 @@ object Frame {
     visible = true
   }
 
-  class teacherFrame extends MainFrame {
+  class TeacherFrame extends MainFrame {
     title = "Admin"
     preferredSize = new Dimension(800, 600)
     resizable = false
@@ -389,7 +418,7 @@ object Frame {
     visible = true
   }
 
-  class registerFrame extends MainFrame {
+  class RegisterFrame extends MainFrame {
     title = "Register"
     preferredSize = new Dimension(220, 290)
     resizable = false
@@ -527,7 +556,7 @@ object Frame {
     override def closeOperation = { back }
   }
 
-  class loginFrame extends MainFrame {
+  class LoginFrame extends MainFrame {
     title = "Login or Register"
     preferredSize = new Dimension(280, 150)
     resizable = false
@@ -570,7 +599,7 @@ object Frame {
     }
     private[this] def register(): Unit = {
       visible = false
-      registerFr = new registerFrame
+      registerFr = new RegisterFrame
     }
   }
 

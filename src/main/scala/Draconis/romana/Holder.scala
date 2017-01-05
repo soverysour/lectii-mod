@@ -7,6 +7,7 @@ object Holder {
   private[this] var settings: Map[String, String] = Map[String, String]()
   private[this] var currentUser: Cont = _
   private[this] var currentModule: String = _
+  private[this] var stats: (String, String) = _
 
   private[this] var info: Set[Lectura] = Set[Lectura]()
   private[this] var tests: Set[Test] = Set[Test]()
@@ -19,7 +20,14 @@ object Holder {
     })
   }
 
-  def setModule(m: String): Unit = { currentModule = m }
+  def setModule(m: String): Unit = {
+    currentModule = m
+
+    settings = Map()
+    info = Set()
+    tests = Set()
+    gallery = Set()
+  }
   def getModule: String = currentModule
   def getUser: Cont = currentUser
   def setUser(arg: String): Unit = { currentUser = users(arg) }
@@ -29,6 +37,9 @@ object Holder {
     try { users(arg).parola }
     catch { case _: Throwable => "" }
   }
+
+  def setStats(left: String, right: String): Unit = stats = left -> right
+  def getStats: (String, String) = stats
 
   def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
   def getTests: List[Test] = tests.toList.sortWith(sortElem)
