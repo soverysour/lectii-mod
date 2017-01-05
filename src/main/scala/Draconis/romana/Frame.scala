@@ -13,6 +13,8 @@ object Frame {
 
   private[this] var moduleFr: ModuleFrame = _
   private[this] var elevFr: ElevFrame = _
+  private[this] var reviewFr: ReviewFrame = _
+  private[this] var instanceFr: InstanceFrame = _
 
   private[this] var teacherFr: TeacherFrame = _
 
@@ -26,7 +28,7 @@ object Frame {
 
   def initial(): Unit = loginFr = new LoginFrame
 
-  def refreshElev(): Unit = elevFr.refresh
+  def refreshElev(): Unit = if ( elevFr != null ) elevFr.refresh
 
   class ModuleFrame extends MainFrame {
     title = "Choose your module"
@@ -57,6 +59,50 @@ object Frame {
     visible = true
   }
 
+  class InstanceFrame(n: String) extends MainFrame {
+    title = "Teste date"
+    resizable = true
+    preferredSize = new Dimension(400, 300)
+
+    contents = new FlowPanel {
+      Core.testInstances(n).foreach( x => {
+        //TODO
+      })
+    }
+
+    peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+    override def closeOperation = {
+      close
+      elevFr.visible = true
+    }
+
+    centerOnScreen
+    visible = true
+  }
+
+  class ReviewFrame extends MainFrame {
+    title = "Tipuri de teste"
+    resizable = true
+    preferredSize = new Dimension(400, 300)
+
+    contents = new FlowPanel {
+      Holder.getTests.foreach( x => contents += Button(x.nume){ sweet(x.nume) } )
+    }
+
+    peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+    override def closeOperation = {
+      close
+      elevFr.visible = true
+    }
+    private[this] def sweet(nume: String): Unit = {
+      visible = false
+      instanceFr = new InstanceFrame(nume)
+    }
+
+    centerOnScreen
+    visible = true
+  }
+
   class ElevFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
@@ -64,15 +110,15 @@ object Frame {
     resizable = true
     preferredSize = new Dimension(400, 300)
 
-    var nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
-    var proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
+    private[this] var nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
+    private[this] var proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
 
     def refresh(): Unit = {
       proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
       nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
     }
 
-    val stuff = new TabbedPane() {
+    contents = new TabbedPane() {
       pages += new TabbedPane.Page("Materiale", new FlowPanel {
         Holder.getInfo.foreach(x => {
           contents += Button(x.nume) { open(1, x.nume) }
@@ -116,34 +162,43 @@ object Frame {
           contents += Swing.VStrut(10)
           contents += nMed
           contents += Swing.VStrut(10)
+          contents += Button("Teste date"){ changeToReview }
+          contents += Swing.VStrut(10)
+          contents += Button("Schimba lectia"){
+            close
+            moduleFr = new ModuleFrame
+          }
+          contents += Swing.VStrut(10)
         }
         border = Swing.EmptyBorder(15, 15, 15, 15)
         background = Color.gray
       })
     }
 
-    contents = stuff
-
     centerOnScreen
     visible = true
 
+    private[this] def changeToReview(): Unit = {
+      visible = false
+      reviewFr = new ReviewFrame
+    }
     private[this] def open(label: Int, identity: String): Unit = {
       if (label == 1) Holder.getExactInfo(identity) match {
         case Some(x) =>
-          new materialFrame(x)
           elevFr.visible = false
+          new materialFrame(x)
         case None => {}
       }
       else if (label == 2) Holder.getExactTest(identity) match {
         case Some(x) =>
-          new testFrame(x)
           elevFr.visible = false
+          new testFrame(x)
         case None => {}
       }
       else Holder.getExactGallery(identity) match {
         case Some(x) =>
-          new galleryFrame(x)
           elevFr.visible = false
+          new galleryFrame(x)
         case None => {}
       }
     }

@@ -69,7 +69,7 @@ object Core {
         else y._1
       })
     })
-    
+
     val nor = Holder.getExactTest(id)
     nor match {
       case Some(x) =>
@@ -180,6 +180,16 @@ object Core {
     val tempo = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
     Holder.setStats(percent.toString, tempo)
     Frame.refreshElev
+  }
+
+  def testInstances(n: String): List[String] = {
+    val entries = readF(s"${home}${Holder.getModule}/dictionary.txt")
+      .to[ListBuffer].filter(_ != "")
+      .filter(_.split("#")(3) == Holder.getUser.username)
+      .filter(_.split("#")(1) == n)
+
+      //TODO
+      List[String]()
   }
 
 }

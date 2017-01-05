@@ -104,7 +104,7 @@ object Holder {
     override val nume: String = name
   }
 
-  class Gallery(val name: String, val level: Int) extends ToSort {
+  class Gallery(name: String, level: Int) extends ToSort {
     override val nivel: Int = level
     override val nume: String = name
   }
