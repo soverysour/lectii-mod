@@ -57,8 +57,8 @@ object Core {
     val path = home + Holder.getModule + "/"
     val u =  Holder.getUser.username
     var xx = 0
-    var total: Double = 0
-    var score: Double = 0
+    var total = 0.0
+    var score = 0.0
     var brute = ""
 
     readF(path + "dictionary.txt").foreach( x => if (x contains id) xx += 1 )
@@ -81,10 +81,8 @@ object Core {
               ss <- newSp
               if ss._1 == beta._1
               if ss._2 != ""
-            } if ( beta._2.split("[,]").map(_.toLowerCase.trim ) contains ss._2.toLowerCase.trim ){
+            } if ( beta._2.split("[,]").map(_.toLowerCase.trim ) contains ss._2.toLowerCase.trim )
               brute = brute + "C##E:V:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
-              score += alfa.score / alfa.exercitii.size
-            }
             else brute = brute + "C##E:P:" + beta._1 + "##" + ss._2.toLowerCase.trim + "\n"
           }
           else if ( alfa.tip == "D##D" ){
@@ -92,10 +90,8 @@ object Core {
               beta <- alfa.exercitii
               ss <- leftRi
               if beta._1 == ss._1
-            } if ( beta._2 == ss._2 ){
+            } if ( beta._2 == ss._2 )
               brute = brute + "D##D:V:" + beta._1 + "##" + ss._2 + "\n"
-              score += alfa.score / alfa.exercitii.size
-            }
             else brute = brute + "D##D:P:" + beta._1 + "##" + ss._2 + "\n"
           }
           else if ( alfa.tip == "C##V" ){
@@ -113,42 +109,64 @@ object Core {
       case None => {}
     }
 
-    var toCheck = List[String]()
-    brute.split("\n").foreach( x => {
-      if ( x.startsWith("C##V:V:") && !toCheck.contains(x.drop(7).split("##")(0)) ){
-        toCheck = x.drop(7).split("##")(0) :: toCheck
-      }
-    })
+    val building = ListBuffer[(String, String)]()
+    brute.split("\n").filter(_.startsWith("C##V")).foreach( x => {
+      var toGive = true
 
-    toCheck.foreach( x => {
-      var good = true
-      brute.split("\n").foreach( y => {
-        if ((y contains x) && (y contains "C##V:P:")) good = false
+      building.foreach( y => {
+        if ( y._1.drop(7).split("##")(0) == x.drop(7).split("##")(0) )
+          toGive = false
       })
-      if ( good ){
-        nor match {
-          case Some(z) =>
-            for {
-              alfa <- z.problems
-              beta <- alfa.exercitii
-              if beta._1 == x
-            } score += alfa.score / alfa.exercitii.size
-          case None => {}
+
+      if ( toGive ) building += x.take(7) + x.drop(7).split("##")(0) -> x.split("##")(2)
+      else for ( zz <- 0 until building.size ){
+        if ( building(zz)._1.drop(7).split("##")(0) == x.drop(7).split("##")(0) ){
+          if ( x.drop(5).startsWith("P:") || building(zz)._1.drop(5).startsWith("P:") )
+            building(zz) = "C##V:P:" + building(zz)._1.drop(7) -> s"${x.split("##")(2)},${building(zz)._2}"
+          else building(zz) = "C##V:V:" + building(zz)._1.drop(7) -> s"${x.split("##")(2)},${building(zz)._2}"
         }
       }
     })
 
+    val processed = {
+      var sweet = ""
+      for ( x <- brute.split("\n").filter(!_.startsWith("C##V")) ) sweet = s"${sweet}${x}\n"
+      for ( x <- building ) sweet = s"${sweet}${x._1}##${x._2}\n"
+      nor match {
+        case Some(x) =>
+          for {
+            alfa <- x.problems
+            beta <- alfa.exercitii
+            if !(brute.split("\n").map(x=>x.drop(7).split("##")(0)) contains beta._1)
+          } sweet = s"${sweet}${alfa.tip}:P:${beta._1}\n"
+        case None => {}
+      }
+      sweet
+    }
+
+    nor match {
+      case Some(x) =>
+        for {
+          alfa <- processed.split("\n")
+          beta <- x.problems
+          gamma <- beta.exercitii
+          if gamma._1 == alfa.drop(7).split("##")(0)
+          if alfa.drop(5).startsWith("V:")
+        } score += beta.score / beta.exercitii.size
+      case None => {}
+    }
+
     val secTot = s"${score}/${total}"
     writeF(s"${path}dictionary.txt", s"T#${id}#${xx}#${u}#${secTot}\n", true)
-    writeF(s"${path}/progress/T--${id}--${xx}--${u}", brute, false)
+    writeF(s"${path}/progress/T--${id}--${xx}--${u}", processed, false)
 
     calculateStats
   }
 
   private[this] def calculateStats(): Unit = {
     val finals = ListBuffer[String]()
-    val entries: ListBuffer[String] = readF(s"${home}${Holder.getModule}/dictionary.txt").
-      to[ListBuffer].filter(_ != "").filter(_.split("#")(3) == Holder.getUser.username)
+    val entries: ListBuffer[String] = readF(s"${home}${Holder.getModule}/dictionary.txt")
+    .to[ListBuffer].filter(_ != "").filter(_.split("#")(3) == Holder.getUser.username)
 
     for ( alfa <- 0 until entries.size ){
       var suite = entries(alfa)
@@ -182,14 +200,16 @@ object Core {
     Frame.refreshElev
   }
 
-  def testInstances(n: String): List[String] = {
-    val entries = readF(s"${home}${Holder.getModule}/dictionary.txt")
-      .to[ListBuffer].filter(_ != "")
-      .filter(_.split("#")(3) == Holder.getUser.username)
-      .filter(_.split("#")(1) == n)
+  def testInstances(n: String): List[(String, String)] = readF(s"${home}${Holder.getModule}/dictionary.txt")
+    .to[List].filter(_ != "")
+    .filter(_.startsWith("T"))
+    .filter(_.split("#")(3) == Holder.getUser.username)
+    .filter(_.split("#")(1) == n)
+    .sortWith(_.split("#")(2).split("[/]")(0).toDouble > _.split("#")(2).split("[/]")(0).toDouble)
+    .map( x => s"${x.split("#")(1)} | ${x.split("#")(4)}" -> x.split("#")(2) )
 
-      //TODO
-      List[String]()
+  def getResults(n: String, d: String): IndexedSeq[String] = {
+    readF(s"${home}${Holder.getModule}/progress/T--${n}--${d}--${Holder.getUser.username}")
   }
 
 }

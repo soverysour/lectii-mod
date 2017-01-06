@@ -59,6 +59,44 @@ object Frame {
     visible = true
   }
 
+  class TakenTestFrame(test: String, discr: String) extends MainFrame {
+    title = test
+    resizable = true
+    preferredSize = new Dimension(800, 600)
+
+    val (good, bad) = Core.getResults(test.split("[|]")(0).trim,
+      discr).partition(_.drop(5).startsWith("V:"))
+
+    contents = new BoxPanel(Orientation.Vertical){
+      contents += new Label("INCORECT:")
+      contents += Swing.VStrut(15)
+
+      bad.foreach( x => {
+        contents += new Label(x.drop(7))
+        contents += Swing.VStrut(15)
+      })
+
+      contents += new Label("CORECT:")
+      contents += Swing.VStrut(15)
+
+      good.foreach( x => {
+        contents += new Label(x.drop(7))
+        contents += Swing.VStrut(15)
+      })
+
+      border = Swing.EmptyBorder(15, 15, 15, 15)
+    }
+
+    peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+    override def closeOperation = {
+      close
+      elevFr.visible = true
+    }
+
+    centerOnScreen
+    visible = true
+  }
+
   class InstanceFrame(n: String) extends MainFrame {
     title = "Teste date"
     resizable = true
@@ -66,8 +104,13 @@ object Frame {
 
     contents = new FlowPanel {
       Core.testInstances(n).foreach( x => {
-        //TODO
+        contents += Button(x._1){ goTo(x._1, x._2) }
       })
+    }
+
+    private[this] def goTo(test: String, discr: String): Unit = {
+      close
+      new TakenTestFrame(test, discr)
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -95,7 +138,7 @@ object Frame {
       elevFr.visible = true
     }
     private[this] def sweet(nume: String): Unit = {
-      visible = false
+      close
       instanceFr = new InstanceFrame(nume)
     }
 
@@ -114,8 +157,8 @@ object Frame {
     private[this] var proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
 
     def refresh(): Unit = {
-      proc = new Label(s"${Holder.getModule} este ${Holder.getStats._1}% complet.")
-      nMed = new Label(s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}.")
+      proc.text = s"${Holder.getModule} este ${Holder.getStats._1}% complet."
+      nMed.text = s"Nota medie a dumneavoastra pentru lectia ${Holder.getModule} este ${Holder.getStats._2}."
     }
 
     contents = new TabbedPane() {
