@@ -99,39 +99,24 @@ object Core {
               beta <- alfa.exercitii
               ss <- ultCh
               if beta._1 == ss._1
-            } for {
-              gamma <- ss._2
-            } if ( beta._2.split("[,]") contains gamma )
-            brute = brute + "C##V:V:" + beta._1 + "##" + gamma + "\n"
-            else brute = brute + "C##V:P:" + beta._1 + "##" + gamma + "\n"
+            }{
+              var exact = ""
+              var good = true
+              for ( gamma <- ss._2 ){
+                if ( !(beta._2.split("[,]") contains gamma) )
+                  good = false
+                exact = s"${gamma},${exact}"
+              }
+              if ( good ) brute = brute + "C##V:V:" + beta._1 + "##" + exact + "\n"
+              else brute = brute + "C##V:P:" + beta._1 + "##" + exact + "\n"
+            }
           }
         }
       case None => {}
     }
-
-    val building = ListBuffer[(String, String)]()
-    brute.split("\n").filter(_.startsWith("C##V")).foreach( x => {
-      var toGive = true
-
-      building.foreach( y => {
-        if ( y._1.drop(7).split("##")(0) == x.drop(7).split("##")(0) )
-          toGive = false
-      })
-
-      if ( toGive ) building += x.take(7) + x.drop(7).split("##")(0) -> x.split("##")(2)
-      else for ( zz <- 0 until building.size ){
-        if ( building(zz)._1.drop(7).split("##")(0) == x.drop(7).split("##")(0) ){
-          if ( x.drop(5).startsWith("P:") || building(zz)._1.drop(5).startsWith("P:") )
-            building(zz) = "C##V:P:" + building(zz)._1.drop(7) -> s"${x.split("##")(2)},${building(zz)._2}"
-          else building(zz) = "C##V:V:" + building(zz)._1.drop(7) -> s"${x.split("##")(2)},${building(zz)._2}"
-        }
-      }
-    })
-
+    
     val processed = {
-      var sweet = ""
-      for ( x <- brute.split("\n").filter(!_.startsWith("C##V")) ) sweet = s"${sweet}${x}\n"
-      for ( x <- building ) sweet = s"${sweet}${x._1}##${x._2}\n"
+      var sweet = brute
       nor match {
         case Some(x) =>
           for {
@@ -147,7 +132,7 @@ object Core {
     nor match {
       case Some(x) =>
         for {
-          alfa <- processed.split("\n")
+          alfa <- brute.split("\n")
           beta <- x.problems
           gamma <- beta.exercitii
           if gamma._1 == alfa.drop(7).split("##")(0)
