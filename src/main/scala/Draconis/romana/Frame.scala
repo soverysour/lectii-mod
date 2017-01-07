@@ -35,7 +35,7 @@ object Frame {
     resizable = false
     private[this] var asdf: Set[Button] = Set[Button]()
 
-    Core.getModules.foreach(x => { asdf += Button(x) { sweep(x) } })
+    Holder.getModules.foreach(x => { asdf += Button(x) { sweep(x) } })
     asdf foreach restrictHeight
     var ss = new Dimension(0, 0)
 
@@ -149,7 +149,7 @@ object Frame {
   class ElevFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
-    title = Holder.getSettings("titlu")
+    title = Holder.getSettings("title")
     resizable = true
     preferredSize = new Dimension(400, 300)
 
@@ -226,23 +226,17 @@ object Frame {
       reviewFr = new ReviewFrame
     }
     private[this] def open(label: Int, identity: String): Unit = {
-      if (label == 1) Holder.getExactInfo(identity) match {
-        case Some(x) =>
+      if (label == 1){
           elevFr.visible = false
-          new materialFrame(x)
-        case None => {}
+          new materialFrame(Holder.getExactInfo(identity))
       }
-      else if (label == 2) Holder.getExactTest(identity) match {
-        case Some(x) =>
+      else if (label == 2){
           elevFr.visible = false
-          new testFrame(x)
-        case None => {}
+          new testFrame(Holder.getExactTest(identity))
       }
-      else Holder.getExactGallery(identity) match {
-        case Some(x) =>
+      else {
           elevFr.visible = false
-          new galleryFrame(x)
-        case None => {}
+          new galleryFrame(Holder.getExactGallery(identity))
       }
     }
   }
@@ -260,11 +254,11 @@ object Frame {
       contents = new BoxPanel(Orientation.Vertical) {
         for (x <- source.problems) {
 
-          if (x.tip == "C##E") {
+          if (x.kind == "C##E") {
             contents += new Label("Completeaza spatiul liber sub fiecare enunt cu varianta corespunzatoare.")
             contents += Swing.VStrut(10)
 
-            for (alfa <- x.exercitii) {
+            for (alfa <- x.workload) {
               contents += new Label(alfa._1)
               contents += Swing.VStrut(5)
               emptySpaces = (alfa._1, new TextField) :: emptySpaces
@@ -277,11 +271,11 @@ object Frame {
               contents += Swing.VStrut(5)
             }
             contents += Swing.VStrut(10)
-          } else if (x.tip == "C##V") {
+          } else if (x.kind == "C##V") {
             contents += new Label("Alege varianta corecta/variantele corecte de sub fiecare enunt.")
             contents += Swing.VStrut(10)
 
-            for (alfa <- x.exercitii) {
+            for (alfa <- x.workload) {
               contents += new Label(alfa._1)
               contents += Swing.VStrut(5)
 
@@ -302,14 +296,14 @@ object Frame {
               contents += Swing.VStrut(5)
             }
             contents += Swing.VStrut(10)
-          } else if (x.tip == "D##D") {
+          } else if (x.kind == "D##D") {
             contents += new Label("Alege, pentru fiecare element din stanga, elementul din dreapta corespunzator")
             contents += Swing.VStrut(10)
 
 
             var dragDrops = List[(ToggleButton, ToggleButton)]()
 
-            for (alfa <- x.exercitii)
+            for (alfa <- x.workload)
               dragDrops = (new ToggleButton(alfa._1), new ToggleButton(alfa._2)) :: dragDrops
 
             val left = Random.shuffle(dragDrops.map(x => x._1).toList.filter(x => x.text != "Null"))
@@ -473,7 +467,7 @@ object Frame {
     visible = true
   }
 
-  class materialFrame(source: Holder.Lectura) extends MainFrame {
+  class materialFrame(source: Holder.Material) extends MainFrame {
     title = source.nume
     resizable = false
     preferredSize = new Dimension(640, 480)
@@ -621,7 +615,7 @@ object Frame {
           }
         }
       }
-      case _ =>
+      case _ => {}
     }
 
     centerOnScreen
@@ -703,8 +697,8 @@ object Frame {
 
   private[this] def getPas: String = {
     val alfa = "XDvC"
-    val beta = alfa + "SS"
-    beta + alfa.reverse
+    val beta = s"${alfa}SS"
+    s"${beta}${alfa.reverse}"
   }
 
   private[this] def restrictHeight(s: Component): Unit = {

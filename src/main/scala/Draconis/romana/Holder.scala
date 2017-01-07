@@ -1,25 +1,32 @@
 package Draconis.romana
 
 import scala.collection.mutable.{ Map, Set }
+import Defaults.ProcessAccountsSettings.a_splitData
+import Defaults.ProcessRawTest.r_isHeader
+import Defaults.Names.{ elevMark, problemEnd, testSeparator }
 
 object Holder {
-  private[this] var users: Map[String, Cont] = Map[String, Cont]()
-  private[this] var settings: Map[String, String] = Map[String, String]()
+  private[this] var users: Map[String, Cont] = Map()
+  private[this] var settings: Map[String, String] = Map()
   private[this] var currentUser: Cont = _
   private[this] var currentModule: String = _
+  private[this] var moduleList: Array[String] = _
   private[this] var stats: (String, String) = _
 
-  private[this] var info: Set[Lectura] = Set[Lectura]()
-  private[this] var tests: Set[Test] = Set[Test]()
-  private[this] var gallery: Set[Gallery] = Set[Gallery]()
+  private[this] var info: Set[Material] = Set()
+  private[this] var tests: Set[Test] = Set()
+  private[this] var gallery: Set[Gallery] = Set()
 
-  def loadUsers(profiles: IndexedSeq[String]): Unit = {
+  def loadUsers(profiles: Array[String]): Unit = {
     profiles.foreach(x => {
-      val e = x.split("[,]")
-      users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == "e"))
+      val e = a_splitData(x)
+      users += (e(0) -> new Cont(e(0), e(1), e(2), e(3), e(4), e(5), e(6) == elevMark))
     })
   }
+  def loadModules(s: Array[String]): Unit = moduleList = s
 
+  def getModules: Array[String] = moduleList
+  def getModule: String = currentModule
   def setModule(m: String): Unit = {
     currentModule = m
 
@@ -28,7 +35,6 @@ object Holder {
     tests = Set()
     gallery = Set()
   }
-  def getModule: String = currentModule
   def getUser: Cont = currentUser
   def setUser(arg: String): Unit = { currentUser = users(arg) }
   def getSettings(arg: String): String = settings(arg)
@@ -38,28 +44,28 @@ object Holder {
     catch { case _: Throwable => "" }
   }
 
-  def setStats(left: String, right: String): Unit = stats = left -> right
   def getStats: (String, String) = stats
+  def setStats(left: String, right: String): Unit = stats = left -> right
 
-  def getInfo: List[Lectura] = info.toList.sortWith(sortElem)
+  def getInfo: List[Material] = info.toList.sortWith(sortElem)
   def getTests: List[Test] = tests.toList.sortWith(sortElem)
   def getGallery: List[Gallery] = gallery.toList.sortWith(sortElem)
 
-  def getExactInfo(name: String): Option[Lectura] = {
-    info.foreach(x => if (x.nume == name) return Some(x))
-    None
+  def getExactInfo(name: String): Material = {
+    info.foreach(x => if (x.nume == name) return x)
+    new Material(Array(), "", 0)
   }
-  def getExactTest(name: String): Option[Test] = {
-    tests.foreach(x => if (x.nume == name) return Some(x))
-    None
+  def getExactTest(name: String): Test = {
+    tests.foreach(x => if (x.nume == name) return x)
+    new Test(Array(), "", 0)
   }
-  def getExactGallery(name: String): Option[Gallery] = {
-    gallery.foreach(x => if (x.nume == name) return Some(x))
-    None
+  def getExactGallery(name: String): Gallery = {
+    gallery.foreach(x => if (x.nume == name) return x)
+    new Gallery("", 0)
   }
 
-  def addLectura(i: IndexedSeq[String], nu: String, ni: Int): Unit = { info += new Lectura(i, nu, ni) }
-  def addTest(i: IndexedSeq[String], nu: String, ni: Int): Unit = { tests += new Test(i, nu, ni) }
+  def addMaterial(i: Array[String], nu: String, ni: Int): Unit = { info += new Material(i, nu, ni) }
+  def addTest(i: Array[String], nu: String, ni: Int): Unit = { tests += new Test(i, nu, ni) }
   def addGallery(nu: String, ni: Int): Unit = { gallery += new Gallery(nu, ni) }
 
   private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
@@ -72,34 +78,34 @@ object Holder {
     val nume: String
   }
 
-  class Test(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-
+  class Test(sourceTest: Array[String], name: String, level: Int) extends ToSort {
     sealed class Exercitiu(gen: String, val ex: Set[String], sc: String) {
-      val tip = gen
-      val exercitii = for (x <- ex) yield (x.split("##")(0), x.split("##")(1))
+      val kind = gen
+      val workload = for (x <- ex) yield (x.split(testSeparator)(0), x.split(testSeparator)(1))
       val score = sc.toInt
     }
 
     private[this] var subiect = Set[Exercitiu]()
-    private[this] var exer = new Exercitiu("#", Set(), "0")
+    private[this] var exer = new Exercitiu("", Set(), "0")
     private[this] var pp = 0
 
     for (x <- 0 until sourceTest.size) {
-      if (sourceTest(x).startsWith("##")) subiect += new Exercitiu(exer.tip, exer.ex, sourceTest(x).drop(2))
-      else if (sourceTest(x).replaceFirst("[CD]##[EDV]", "#") == "#")
+      if (sourceTest(x).startsWith(problemEnd))
+        subiect += new Exercitiu(exer.kind, exer.ex, sourceTest(x).drop(2))
+      else if (r_isHeader(sourceTest(x)))
         exer = new Exercitiu(sourceTest(x), Set(), "0")
-      else exer = new Exercitiu(exer.tip, exer.ex + sourceTest(x), "0")
+      else exer = new Exercitiu(exer.kind, exer.ex + sourceTest(x), "0")
     }
     subiect.foreach(pp += _.score)
 
     val problems = subiect
-    val puncte = pp
+    val points = pp
     override val nivel: Int = level
     override val nume: String = name
   }
 
-  class Lectura(sourceTest: IndexedSeq[String], name: String, level: Int) extends ToSort {
-    val info = (for (x <- 0 until sourceTest.size) yield sourceTest(x) + "\n").mkString
+  class Material(sourceTest: Array[String], name: String, level: Int) extends ToSort {
+    val info = (for (x <- sourceTest) yield x + "\n").mkString
     override val nivel: Int = level
     override val nume: String = name
   }
