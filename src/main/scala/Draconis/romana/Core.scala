@@ -37,8 +37,6 @@ object Core {
             Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level)
           else if (form == testName)
             Holder.addTest(readF(s"${testPath}${name}"), fullName, level)
-          else if (form == galleryName)
-            Holder.addGallery(fullName, level)
         }
       }
     )
@@ -47,7 +45,7 @@ object Core {
 
   def register(us: String, pa: String, nu: String, pr: String, sc: String,
     opt: String, isElev: Boolean): Unit = {
-    val sp = if (isElev) elevMark else professorMark
+    val sp = if (isElev) studentMark else professorMark
     val link = a_formatData(List(us, pa, nu, pr, sc, opt, sp))
 
     Holder.loadUsers(Array(link))
@@ -66,7 +64,7 @@ object Core {
 
     val finalCheckboxes = newCh.map( x => {
       x._1 -> x._2.map( y => {
-        if ( y._2 ) y._1 + variantIdentifier
+        if ( y._2 ) y._1 + defaultIdentifier
         else y._1
       })
     })
@@ -108,9 +106,9 @@ object Core {
           for ( option <- solution._2 ){
             if ( !(r_splitAns(workSample._2) contains option) )
               good = false
-            exact = s"${option},${exact}"
+            exact = s"${option}${defaultSeparator}${exact}"
           }
-          exact = exact.dropRight(1)
+          exact = exact.dropRight(defaultSeparator.size)
           if ( good ){
             info = t_format(info, workSample._1, exact, true, chooseVariant)
             score += problem.score / problem.workload.size
