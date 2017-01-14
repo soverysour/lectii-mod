@@ -75,6 +75,8 @@ object Defaults {
     val materialName: String = "M"
     val testName: String = "T"
 
+    val nonExisting: String = "null"
+
     val defaultSeparator: String = "##"
     val powerSeparator: String = s"${defaultSeparator}${defaultSeparator}"
     val defaultIdentifier: String = "@@"
@@ -85,12 +87,16 @@ object Defaults {
 
     val good: String = "V"
     val bad: String = "P"
+
+    val studentMark = "student"
+    val professorMark = "professor"
   }
 
   object Paths {
     val homePath: String = s"${System.getProperty("user.home")}/Draconis/"
     val usersPath: String = s"${homePath}users.txt"
     val modulePath: String = s"${homePath}modules.txt"
+    val typePath: String = s"${homePath}channel.txt"
 
     def homeModulePath: String = s"${homePath}${Holder.getModule}/"
     def settingsPath: String = s"${homeModulePath}settings.txt"
@@ -139,18 +145,19 @@ object Defaults {
     def t_getStatus(s: String): String = s.drop(3).take(1)
     def t_getName(s: String): String = s.drop(5).split(Names.powerSeparator)(0)
     def t_getSolution(s: String): String = s.drop(5).split(Names.powerSeparator)(1)
+    def t_splitPro(s: String): Array[String] = s.split(Names.powerSeparator)
+    def t_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
+    def t_isSelected(s: String): Boolean = s.endsWith(Names.defaultIdentifier)
+    def t_getOption(s: String): String = s.dropRight(Names.defaultIdentifier.size)
+
+    def t_isHeader(s: String): Boolean = {
+      if (s.trim == Names.chooseVariant || s.trim == Names.dragDrop || s.trim == Names.completeSpace) true
+      else false
+    }
 
     def t_format(info: String, ask: String, ans: String, good: Boolean, kind: String): String = if (good)
       s"${info}${kind}:${Names.good}:${ask}${Names.powerSeparator}${ans}\n"
     else s"${info}${kind}:${Names.bad}:${ask}${Names.powerSeparator}${ans}\n"
-  }
-  object ProcessRawTest {
-    def r_splitPro(s: String): Array[String] = s.split(Names.powerSeparator)
-    def r_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
-    def r_isHeader(s: String): Boolean = {
-      if (s.trim == Names.chooseVariant || s.trim == Names.dragDrop || s.trim == Names.completeSpace) true
-      else false
-    }
   }
 
 }

@@ -10,7 +10,6 @@ import Defaults.Misc._
 import Defaults.ProcessDictionaryEntries._
 import Defaults.ProcessTestEntries._
 import Defaults.ProcessAccountsSettings._
-import Defaults.ProcessRawTest.r_splitAns
 
 object Core {
 
@@ -20,8 +19,13 @@ object Core {
     .write(new File(path), data, encoding, append)
 
   def main(args: Array[String]): Unit = {
-    Holder.loadUsers(readF(usersPath).filter(a_isProperEntry(_)))
-    Holder.loadModules(readF(modulePath))
+    if ( readF(typePath).mkString == studentMark ){
+      Holder.loadUsers(readF(usersPath).filter(a_isProperEntry(_)))
+      Holder.loadModules(readF(modulePath))
+      Holder.setType(studentMark)
+    }
+    else Holder.setType(professorMark)
+
     Frame.initial()
   }
 
@@ -40,8 +44,7 @@ object Core {
     calculateStats
   }
 
-  def register(us: String, pa: String, nu: String, pr: String, sc: String,
-    opt: String): Unit = {
+  def register(us: String, pa: String, nu: String, pr: String, sc: String, opt: String): Unit = {
     val link = a_formatData(List(us, pa, nu, pr, sc, opt))
 
     Holder.loadUsers(Array(link))
@@ -74,9 +77,9 @@ object Core {
           solution <- newSp
           if solution._1 == workSample._1
           if solution._2 != ""
-        } if ( r_splitAns(workSample._2).map(m_prettify(_)) contains m_prettify(solution._2) ){
+        } if ( t_splitAns(workSample._2).map(m_prettify(_)) contains m_prettify(solution._2) ){
           info = t_format(info, workSample._1, m_prettify(solution._2), true, completeSpace)
-          score += problem.score / problem.workload.size
+          score += problem.score / problem.size
         }
         else info = t_format(info, workSample._1, m_prettify(solution._2), false, completeSpace)
       }
@@ -87,7 +90,7 @@ object Core {
           if workSample._1 == solution._1
         } if ( workSample._2 == solution._2 ){
           info = t_format(info, workSample._1, solution._2, true, dragDrop)
-          score += problem.score / problem.workload.size
+          score += problem.score / problem.size
         }
         else info = t_format(info, workSample._1, solution._2, false, dragDrop)
       }
@@ -100,14 +103,14 @@ object Core {
           var exact = ""
           var good = true
           for ( option <- solution._2 ){
-            if ( !(r_splitAns(workSample._2) contains option) )
+            if ( !(t_splitAns(workSample._2) contains option) )
               good = false
             exact = s"${option}${defaultSeparator}${exact}"
           }
           exact = exact.dropRight(defaultSeparator.size)
           if ( good ){
             info = t_format(info, workSample._1, exact, true, chooseVariant)
-            score += problem.score / problem.workload.size
+            score += problem.score / problem.size
           }
           else info = t_format(info, workSample._1, exact, false, chooseVariant)
         }
@@ -117,7 +120,7 @@ object Core {
     for {
       problem <- exactTest.problems
       workSample <- problem.workload
-      if !(info.split("\n").map(x=> t_getName(x)) contains workSample._1)
+      if ( (!(info.split("\n").map(x=> t_getName(x)) contains workSample._1)) && (workSample._1 != nonExisting && workSample._2 != nonExisting))
     } info = t_format(info, workSample._1, "", false, problem.kind)
 
     val scoreRatio = d_formatScore(score, total)

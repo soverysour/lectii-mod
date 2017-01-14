@@ -1,3 +1,4 @@
 build/
 .gradle/
 doc/TODO.txt
+doc/buglist.txt

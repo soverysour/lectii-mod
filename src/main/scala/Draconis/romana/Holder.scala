@@ -3,7 +3,7 @@ package Draconis.romana
 import scala.collection.mutable.{ Map, Set }
 import scala.util.Random
 import Defaults.ProcessAccountsSettings.a_splitData
-import Defaults.ProcessRawTest.{ r_isHeader, r_splitPro }
+import Defaults.ProcessTestEntries.{ t_isHeader, t_splitPro }
 import Defaults.Names._
 
 object Holder {
@@ -13,6 +13,7 @@ object Holder {
   private[this] var currentModule: String = _
   private[this] var moduleList: Array[String] = _
   private[this] var stats: (String, String) = _
+  private[this] var spec: String = _
 
   private[this] var info: Set[Material] = _
   private[this] var tests: Set[Test] = _
@@ -24,6 +25,8 @@ object Holder {
     })
   }
   def loadModules(s: Array[String]): Unit = moduleList = s
+  def setType(s: String): Unit = spec = s
+  def getType: String = spec
 
   def getModules: Array[String] = moduleList
   def getModule: String = currentModule
@@ -74,8 +77,9 @@ object Holder {
   class Test(sourceTest: Array[String], nume: String, nivel: Int) extends ToSort {
     sealed class Exercitiu(gen: String, val ex: Set[String], sc: String) {
       val kind = gen
-      val workload = Random.shuffle(for (x <- ex) yield (r_splitPro(x)(0), r_splitPro(x)(1)))
+      val workload = Random.shuffle(for (x <- ex) yield (t_splitPro(x)(0), t_splitPro(x)(1)))
       val score = sc.toInt
+      val size = workload.filter( x => (x._1 != nonExisting) && (x._2 != nonExisting)).size
     }
 
     private[this] var subiect = Set[Exercitiu]()
@@ -85,7 +89,7 @@ object Holder {
     for (x <- 0 until sourceTest.size) {
       if (sourceTest(x).startsWith(defaultSeparator))
         subiect += new Exercitiu(exer.kind, exer.ex, sourceTest(x).drop(defaultSeparator.size))
-      else if (r_isHeader(sourceTest(x)))
+      else if (t_isHeader(sourceTest(x)))
         exer = new Exercitiu(sourceTest(x), Set(), "0")
       else exer = new Exercitiu(exer.kind, exer.ex + sourceTest(x), "0")
     }
