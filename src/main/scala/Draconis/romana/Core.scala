@@ -29,24 +29,20 @@ object Core {
     Holder.setModule(m)
 
     readF( settingsPath ).filter(s_isProperEntry(_)).foreach(x => {
-        val Array(form, name, parameters) = s_splitData(x)
-        if (form == settingName) Holder.setSettings(name -> parameters)
-        else {
-          val (fullName, level) = s_getName(parameters) -> s_getLevel(parameters)
-          if (form == materialName)
-            Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level)
-          else if (form == testName)
-            Holder.addTest(readF(s"${testPath}${name}"), fullName, level)
-        }
+      val Array(form, name, parameters) = s_splitData(x)
+      val (fullName, level) = s_getName(parameters) -> s_getLevel(parameters)
+      if (form == materialName)
+        Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level)
+      else if (form == testName)
+        Holder.addTest(readF(s"${testPath}${name}"), fullName, level)
       }
     )
     calculateStats
   }
 
   def register(us: String, pa: String, nu: String, pr: String, sc: String,
-    opt: String, isElev: Boolean): Unit = {
-    val sp = if (isElev) studentMark else professorMark
-    val link = a_formatData(List(us, pa, nu, pr, sc, opt, sp))
+    opt: String): Unit = {
+    val link = a_formatData(List(us, pa, nu, pr, sc, opt))
 
     Holder.loadUsers(Array(link))
     writeF(usersPath, s"\n${link}\n", true)
@@ -60,7 +56,7 @@ object Core {
     var score = 0.0
     var info = ""
 
-    readF(dictionaryPath).foreach( x => if (x contains id) discr += 1 )
+    readF(dictionaryPath).filter( _ != "" ).foreach( x => if (d_getId(x) == id) discr += 1 )
 
     val finalCheckboxes = newCh.map( x => {
       x._1 -> x._2.map( y => {
@@ -125,8 +121,8 @@ object Core {
     } info = t_format(info, workSample._1, "", false, problem.kind)
 
     val scoreRatio = d_formatScore(score, total)
-    writeF(dictionaryPath, d_formatEntry(id, discr, username, scoreRatio), true)
-    writeF(d_formatPath(id, discr, username), info, false)
+    writeF(dictionaryPath, d_formatEntry(id, discr, scoreRatio), true)
+    writeF(d_formatPath(id, discr), info, false)
 
     calculateStats
   }
@@ -174,7 +170,7 @@ object Core {
     .to[List]
 
   def getResults(testName: String, discr: String): Array[String] = {
-    readF(d_formatPath(testName, discr.toInt, Holder.getUser.username))
+    readF(d_formatPath(testName, discr.toInt))
   }
 
 }

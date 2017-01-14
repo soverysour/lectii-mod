@@ -70,12 +70,10 @@ object Defaults {
     val id_name: Int = 3
     val id_school: Int = 4
     val id_optional: Int = 5
-    val id_status: Int = 6
 
     val settingName: String = "S"
     val materialName: String = "M"
     val testName: String = "T"
-    val galleryName: String = "G"
 
     val defaultSeparator: String = "##"
     val powerSeparator: String = s"${defaultSeparator}${defaultSeparator}"
@@ -87,9 +85,6 @@ object Defaults {
 
     val good: String = "V"
     val bad: String = "P"
-
-    val studentMark: String = "e"
-    val professorMark: String = "p"
   }
 
   object Paths {
@@ -102,7 +97,6 @@ object Defaults {
     def dictionaryPath: String = s"${homeModulePath}dictionary.txt"
     def materialPath: String = s"${homeModulePath}material/"
     def testPath: String = s"${homeModulePath}test/"
-    def galleryPath: String = s"${homeModulePath}gallery/"
     def progressPath: String = s"${homeModulePath}progress/"
   }
 
@@ -111,8 +105,7 @@ object Defaults {
 
     def m_isVerified(s: String): Boolean = s.drop(3).startsWith(Names.good)
     def m_prettify(s: String): String = s.toLowerCase.trim
-    def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0"
-      else (sum/n).toString
+    def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
   }
 
   object ProcessAccountsSettings {
@@ -123,11 +116,7 @@ object Defaults {
 
     def a_isProperEntry(s: String): Boolean = s.contains(Names.defaultSeparator)
     def a_splitData(s: String): Array[String] = s.split(Names.defaultSeparator)
-    def a_formatData(s: List[String]): String = {
-      var alfa = ""
-      for ( x <- s ) alfa = s"${alfa}${Names.defaultSeparator}${x}"
-      alfa.drop(Names.defaultSeparator.size)
-    }
+    def a_formatData(s: List[String]): String = (for ( x <- s ) yield s"${Names.defaultSeparator}${x}").mkString.drop(Names.defaultSeparator.size)
   }
 
   object ProcessDictionaryEntries {
@@ -141,12 +130,8 @@ object Defaults {
     def d_getTotal(s: String): Double = s.split(Names.defaultSeparator)(4).split("[/]")(1).toDouble
 
     def d_formatScore(i: Double, j: Double): String = s"${i}/${j}"
-    def d_formatEntry(id: String, discr: Int, user: String, score: String) : String = {
-      s"${Names.testName}${Names.defaultSeparator}${id}${Names.defaultSeparator}${discr}${Names.defaultSeparator}${user}${Names.defaultSeparator}${score}\n"
-    }
-    def d_formatPath(id: String, discr: Int, username: String): String = {
-      s"${Paths.progressPath}${Names.testName}--${id}--${discr}--${username}"
-    }
+    def d_formatEntry(id: String, discr: Int, score: String) : String = s"${Names.testName}${Names.defaultSeparator}${id}${Names.defaultSeparator}${discr}${Names.defaultSeparator}${Holder.getUser.username}${Names.defaultSeparator}${score}\n"
+    def d_formatPath(id: String, discr: Int): String = s"${Paths.progressPath}${Names.testName}--${id}--${discr}--${Holder.getUser.username}"
   }
 
   object ProcessTestEntries {
@@ -160,6 +145,7 @@ object Defaults {
     else s"${info}${kind}:${Names.bad}:${ask}${Names.powerSeparator}${ans}\n"
   }
   object ProcessRawTest {
+    def r_splitPro(s: String): Array[String] = s.split(Names.powerSeparator)
     def r_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
     def r_isHeader(s: String): Boolean = {
       if (s.trim == Names.chooseVariant || s.trim == Names.dragDrop || s.trim == Names.completeSpace) true

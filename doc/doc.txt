@@ -1,65 +1,21 @@
-A lesson is a folder which contains:
-  -The folder for tests.
-  -The folder for materials.
-  -The folder for gallery.
-  -The settings file.
+Most of the stuff changed, here's what it'll be:
 
-A teacher makes/initiates:
-  -A new material by specifying its title, level, and contents.
-  -A test by specifying its title, level, and title, content and points for each exercise to solve.
-  -A gallery file by specifying a title and a file with the help of a FileChooser.
-  -Settings for a said module, such as title.
-  -A transmission of data by either sending a whole new lesson (module) or specifying bits to add /
-   replace in a pre-existent module.
+This application, when first started, presents a dialogue, to make it a "Student" build or a "Professor"
+build.
 
-The available actions for a teacher are:
-  -Add test, material, gallery entry;
-  -Remove test, material, gallery entry.
-  -Change global project settings.
-  -Request statistics about the users and their progress.
+A Student build :
+  - Creates a student account.
+  - Selects one or multiple Professors to listen to (IPs).
+  - Takes materials and tests.
+  - Can view information about his profile and progress, and review itself.
+  - Obeys calls from the supervising Professor.
 
-The types of problems that will exist are :
-  -Choose the correct variant. C##V
-  -Drag and drop. D##D
-  -Complete the empty line. C##E
+> Obey calls from the supervising Professor :
+  This means that, even though the student has nothing to do with anything outside their spectrum,
+  except selecting their professor, the client itself does all that without the student's input.
 
-Let's reiterate:
+A Professor build :
+  - Creates, edits and deletes modules and module bits, locally or across its students.
+  - Can make calls to students and receive data regarding their profile or progress, basically anything.
 
-  -I open the application.
-  -The database of all the users is loaded.
-  -I get to log in.
-  -I can also make an account.
-  -When I make an account, depending on the type, student or teacher, I have different fields to
-   fill.
-  -Depending on the type of the account, I will have different interaction after I log in.
-
-If I log in with a student account :
-
-  -I get to pick a current module.
-  -After I pick a module, all the data related to that module is loaded.
-  -I can go over the materials, gallery, complete a test or see my profile.
-  -I can also change the running module, for a different lesson.
-
-  -Materials are all put in the materials bar. All the data, sorted, which pops when clicked on.
-  -The tests are also there, sorted, with a disginguishing element on, where the case is, to show
-   which has been completed and which has not.
-  -The gallery works in the same way as the materials section, sorted and popping.
-  -The profile section displays overall statistics and analysis of the data stored, per account.
-  -The profile section doesn't go into full detail, even though it keeps it. Just to fit.
-
-  -The progress storing is done per account, then per element(gallery, test, material).
-  -It keeps all sorts of information, either to process it and display locally, or to parse it via
-   network.
-
-If I log in with a teacher account :
-
-  -I can create a new module / bits of a module.
-  -I can edit / delete a module / bits of a module, only locally.
-  -I get to create and manage classes, where clients have IPs and other details.
-  -I get to send data to clients and make requests to the clients, to get data back.
-  -I also get to manage the database of local accounts.
-
--A user of a student client has nothing to do directly with the networking part. The client works,
- but always obeys.
--A teacher client can only push to and get information from, not manage it locally, such as deleting
- data from the client, therefore, each client has to manage its own data through a teacher account.
+There will exist a certain passcode, to not allow app builds to simply be modified into a professor one.

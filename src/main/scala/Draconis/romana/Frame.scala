@@ -4,11 +4,13 @@ import scala.swing._
 import scala.swing.event._
 import scala.util.Random
 import java.awt.{ Color, BasicStroke }
+import java.lang.Error
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 import scala.collection.mutable.{ Set, ListBuffer }
 import Defaults.Frame._
 import Defaults.Names._
 import Defaults.Misc.m_isVerified
+import Defaults.ProcessRawTest.r_splitAns
 
 object Frame {
   private[this] var loginFr: LoginFrame = _
@@ -18,13 +20,12 @@ object Frame {
   private[this] var elevFr: StudentFrame = _
   private[this] var reviewFr: ReviewFrame = _
   private[this] var instanceFr: InstanceFrame = _
+  private[this] var takenTestFr: TakenTestFrame = _
 
-  private[this] var teacherFr: TeacherFrame = _
-
-  private[this] def commence(): Unit = {
+  private[this] def commence(label: String): Unit = {
     loginFr.close
-    if (Holder.getUser.isStudent) moduleFr = new ModuleFrame
-    else teacherFr = new TeacherFrame
+    if (label == "student") moduleFr = new ModuleFrame
+    else throw new Error("Conturile tip profesor nu au functionalitate, inca.")
   }
 
   def initial(): Unit = loginFr = new LoginFrame
@@ -36,7 +37,7 @@ object Frame {
     resizable = false
     private[this] var modules: Set[Button] = Set[Button]()
 
-    Holder.getModules.foreach(x => { modules += Button(x) { sweep(x) } })
+    Holder.getModules.foreach(x => modules += Button(x) { sweep(x) } )
     modules.foreach(restrictHeight)
     var ss = new Dimension(0, 0)
 
@@ -111,7 +112,7 @@ object Frame {
 
     private[this] def goTo(test: String, discr: String): Unit = {
       close
-      new TakenTestFrame(test, discr)
+      takenTestFr = new TakenTestFrame(test, discr)
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -150,7 +151,7 @@ object Frame {
   class StudentFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
-    title = Holder.getSettings("title")
+    title = a
     resizable = true
     preferredSize = new Dimension(400, 300)
 
@@ -269,7 +270,7 @@ object Frame {
 
               contents += new BoxPanel(Orientation.Horizontal) {
                 checkBoxes.+=:(workSample._1 -> List())
-                for (variant <- workSample._2.split(defaultSeparator)) {
+                for (variant <- r_splitAns(workSample._2)) {
                   if (variant.endsWith(defaultIdentifier)) {
                     checkBoxes(0) = (checkBoxes(0)._1 -> (new CheckBox(variant.dropRight(defaultIdentifier.size)) :: checkBoxes(0)._2))
                     contents += checkBoxes(0)._2(0)
@@ -452,12 +453,13 @@ object Frame {
     resizable = false
     preferredSize = new Dimension(640, 480)
 
-    contents = new TextPane() {
-      background = Color.gray
-      foreground = Color.white
+    contents = new ScrollPane {
+      contents = new EditorPane("text/html", source.info) {
+        background = Color.white
+        foreground = Color.black
 
-      text = source.name + "\n\n" + source.info
-      editable = false
+        editable = false
+      }
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -465,15 +467,6 @@ object Frame {
       close
       elevFr.visible = true
     }
-
-    centerOnScreen
-    visible = true
-  }
-
-  class TeacherFrame extends MainFrame {
-    title = r_title
-    preferredSize = new Dimension(800, 600)
-    resizable = false
 
     centerOnScreen
     visible = true
@@ -489,28 +482,20 @@ object Frame {
     private[this] val cSurname = new TextField
     private[this] val cName = new TextField
     private[this] val cSchool = new TextField
-    private[this] val cOptional = new Label(r_optionalLabelStudent)
-    private[this] val cOpttext = new TextField
-    private[this] val cStateStudent = new RadioButton(r_radioLabelStudent)
-    private[this] val cStateProfessor = new RadioButton(r_radioLabelProfessor)
-    private[this] val cStatus = new ButtonGroup(cStateStudent, cStateProfessor)
+    private[this] val cClassLabel = new Label(r_optionalLabelStudent)
+    private[this] val cClass = new TextField
     private[this] val cCreation = Button(r_creationButtonLabel) {
       register(cUsername.text, cPassword.password.mkString, cSurname.text,
-        cName.text, cSchool.text, cOpttext.text, cStateStudent.selected)
+        cName.text, cSchool.text, cClass.text)
     }
     private[this] val cQuit = Button(r_quitButtonLabel) { back }
-    private[this] val cSpecial = new PasswordField
 
     restrictHeight(cUsername)
     restrictHeight(cPassword)
     restrictHeight(cSurname)
     restrictHeight(cName)
     restrictHeight(cSchool)
-    restrictHeight(cOpttext)
-    restrictHeight(cSpecial)
-
-    cStateStudent.selected = true
-    cSpecial.editable = false
+    restrictHeight(cClass)
 
     contents = new BoxPanel(Orientation.Vertical) {
       contents += new BoxPanel(Orientation.Horizontal) {
@@ -543,18 +528,11 @@ object Frame {
         contents += cSchool
       }
       contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += Swing.HStrut(5)
-        contents += cStateStudent
-        contents += Swing.HStrut(10)
-        contents += cStateProfessor
+      contents += new BoxPanel(Orientation.Horizontal){
+        contents += cClassLabel
+        contents == Swing.HStrut(5)
+        contents += cClass
       }
-      contents += Swing.VStrut(5)
-      contents += cOptional
-      contents == Swing.VStrut(5)
-      contents += cOpttext
-      contents += Swing.VStrut(5)
-      contents += cSpecial
       contents += Swing.VStrut(5)
       contents += new BoxPanel(Orientation.Horizontal) {
         contents += cQuit
@@ -566,42 +544,15 @@ object Frame {
       contents.foreach(x => x.xLayoutAlignment = 0.5)
     }
 
-    listenTo(cStateStudent)
-    listenTo(cStateProfessor)
-    reactions += {
-      case ButtonClicked(button) => {
-        button.text match {
-          case x: String if x == r_radioLabelStudent => {
-            cOptional.text = r_optionalLabelStudent
-            cSpecial.peer.setText("")
-            cSpecial.editable = false
-            cOpttext.text = ""
-          }
-          case x: String if x == r_radioLabelProfessor => {
-            cOptional.text = r_optionalLabelProfessor
-            cSpecial.editable = true
-            cOpttext.text = ""
-          }
-          case _ => {}
-        }
-      }
-      case _ => {}
-    }
-
     centerOnScreen
     visible = true
 
     private[this] def register(username: String, pass: String, surname: String,
-      name: String, school: String, opttext: String, stateStudent: Boolean): Unit = {
+      name: String, school: String, opttext: String): Unit = {
       if (good(List(username, pass, surname, name, school, opttext))) {
         if (Holder.getLog(username) == "") {
-          if (stateStudent) {
-            Core.register(username, pass, surname, name, school, opttext, true)
-            back
-          } else if (cSpecial.password.mkString == lId) {
-            Core.register(username, pass, surname, name, school, opttext, false)
-            back
-          } else Dialog.showMessage(contents.head, r_invalidTokenMessage, title = r_invalidData)
+          Core.register(username, pass, surname, name, school, opttext)
+          back
         } else Dialog.showMessage(contents.head, r_userConflictMessage, title = r_invalidData)
       } else Dialog.showMessage(contents.head, r_invalidInputMessage, title = r_invalidData)
     }
@@ -656,7 +607,7 @@ object Frame {
         Dialog.showMessage(contents.head, l_noUserMessage, title = l_invalidData)
       else if (pass == Holder.getLog(name)) {
         Holder.setUser(name)
-        commence
+        commence("student")
       } else Dialog.showMessage(contents.head, l_badPasswordMessage, title = l_invalidData)
     }
     private[this] def register(): Unit = {
@@ -665,16 +616,7 @@ object Frame {
     }
   }
 
-  private[this] def restrictHeight(s: Component): Unit = {
-    s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
-  }
-
-  private[this] def restrictWidth(s: Component): Unit = {
-    s.maximumSize = new Dimension(s.preferredSize.height, Short.MaxValue)
-  }
-
-  private[this] def restrictSize(s: Component): Unit = {
-    s.maximumSize = new Dimension(s.preferredSize.width, s.preferredSize.height)
-  }
-
+  private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
+  private[this] def restrictWidth(s: Component): Unit = s.maximumSize = new Dimension(s.preferredSize.height, Short.MaxValue)
+  private[this] def restrictSize(s: Component): Unit = s.maximumSize = new Dimension(s.preferredSize.width, s.preferredSize.height)
 }

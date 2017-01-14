@@ -1,8 +1,9 @@
 package Draconis.romana
 
 import scala.collection.mutable.{ Map, Set }
+import scala.util.Random
 import Defaults.ProcessAccountsSettings.a_splitData
-import Defaults.ProcessRawTest.r_isHeader
+import Defaults.ProcessRawTest.{ r_isHeader, r_splitPro }
 import Defaults.Names._
 
 object Holder {
@@ -19,7 +20,7 @@ object Holder {
   def loadUsers(profiles: Array[String]): Unit = {
     profiles.foreach(x => {
       val e = a_splitData(x)
-      users += (e(id_username) -> new Cont(e(id_username), e(id_password), e(id_surname), e(id_name), e(id_school), e(id_optional), e(id_status) == studentMark))
+      users += (e(id_username) -> new Cont(e(id_username), e(id_password), e(id_surname), e(id_name), e(id_school), e(id_optional)))
     })
   }
   def loadModules(s: Array[String]): Unit = moduleList = s
@@ -73,7 +74,7 @@ object Holder {
   class Test(sourceTest: Array[String], nume: String, nivel: Int) extends ToSort {
     sealed class Exercitiu(gen: String, val ex: Set[String], sc: String) {
       val kind = gen
-      val workload = for (x <- ex) yield (x.split(powerSeparator)(0), x.split(powerSeparator)(1))
+      val workload = Random.shuffle(for (x <- ex) yield (r_splitPro(x)(0), r_splitPro(x)(1)))
       val score = sc.toInt
     }
 
@@ -83,7 +84,7 @@ object Holder {
 
     for (x <- 0 until sourceTest.size) {
       if (sourceTest(x).startsWith(defaultSeparator))
-        subiect += new Exercitiu(exer.kind, exer.ex, sourceTest(x).drop(2))
+        subiect += new Exercitiu(exer.kind, exer.ex, sourceTest(x).drop(defaultSeparator.size))
       else if (r_isHeader(sourceTest(x)))
         exer = new Exercitiu(sourceTest(x), Set(), "0")
       else exer = new Exercitiu(exer.kind, exer.ex + sourceTest(x), "0")
@@ -97,11 +98,11 @@ object Holder {
   }
 
   class Material(sourceTest: Array[String], nume: String, nivel: Int) extends ToSort {
-    val info = (for (x <- sourceTest) yield x + "\n").mkString
+    val info = sourceTest.mkString
     override val level: Int = nivel
     override val name: String = nume
   }
 
   class Cont(val username: String, val password: String, val surname: String, val name: String,
-    val school: String, val optText: String, val isStudent: Boolean)
+    val school: String, val optText: String)
 }
