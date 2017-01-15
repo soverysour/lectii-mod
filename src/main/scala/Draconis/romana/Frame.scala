@@ -38,6 +38,7 @@ object Frame {
   private[this] def restrictSize(s: Component): Unit = s.maximumSize = new Dimension(s.preferredSize.width, s.preferredSize.height)
 
   private[this] val logsFont = new Font(Font.MONOSPACED, Font.BOLD, 14)
+  private[this] val wLogsFont = new Font(Font.MONOSPACED, Font.PLAIN, 13)
   private[this] val menuFont = new Font(Font.MONOSPACED, Font.BOLD, 15)
   private[this] val moduleFont = new Font(Font.MONOSPACED, Font.PLAIN, 18)
   private[this] val headerFont = new Font(Font.MONOSPACED, Font.PLAIN, 28)
@@ -66,7 +67,6 @@ object Frame {
         else ss = new Dimension(ss.width, ss.height + mod(x).preferredSize.height + 10 )
       }
       preferredSize = new Dimension(ss.width + 30, ss.height + 15)
-      background = Color.white
       border = Swing.EmptyBorder(15, 15, 15, 15)
     }
 
@@ -180,10 +180,8 @@ object Frame {
           contents += button
           if ( x < instances.size - 1 ) contents += Swing.VStrut(5)
         }
-        background = Color.white
         border = Swing.EmptyBorder(15, 15, 15, 15)
       }
-      background = Color.white
     }
 
     private[this] def goTo(test: String, discr: String): Unit = {
@@ -215,10 +213,8 @@ object Frame {
           contents += button
           if ( x < instances.size - 1 ) contents += Swing.VStrut(5)
         }
-        background = Color.white
         border = Swing.EmptyBorder(15, 15, 15, 15)
       }
-      background = Color.white
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -261,7 +257,6 @@ object Frame {
             contents += button
           })
           border = Swing.EmptyBorder(15, 15, 15, 15)
-          background = Color.white
         }
       }){font = menuFont}
       pages += new TabbedPane.Page(s_testTab, new ScrollPane{
@@ -272,7 +267,6 @@ object Frame {
             contents += button
           })
           border = Swing.EmptyBorder(15, 15, 15, 15)
-          background = Color.white
         }
       }){font = menuFont}
       pages += new TabbedPane.Page(s_profileTab, new BoxPanel(Orientation.Horizontal) {
@@ -290,7 +284,6 @@ object Frame {
           contents += Swing.VStrut(10)
           xLayoutAlignment = 0
           yLayoutAlignment = 0
-          background = Color.white
           border = Swing.EmptyBorder(15, 15, 15, 15)
         }
         contents += new BoxPanel(Orientation.Vertical){
@@ -312,11 +305,9 @@ object Frame {
           contents += Swing.VStrut(10)
           xLayoutAlignment = 0
           yLayoutAlignment = 0
-          background = Color.white
           border = Swing.EmptyBorder(15, 15, 15, 15)
         }
         border = Swing.EmptyBorder(15, 15, 15, 15)
-        background = Color.white
       }){font = menuFont}
     }
 
@@ -587,21 +578,22 @@ object Frame {
 
   class RegisterFrame extends MainFrame {
     title = r_title
-    preferredSize = new Dimension(220, 290)
+    preferredSize = new Dimension(300, 250)
     resizable = false
 
-    private[this] val cUsername = new TextField
-    private[this] val cPassword = new PasswordField
-    private[this] val cSurname = new TextField
-    private[this] val cName = new TextField
-    private[this] val cSchool = new TextField
-    private[this] val cClassLabel = new Label(r_optionalLabelStudent)
-    private[this] val cClass = new TextField
+    private[this] val cUsername = new TextField { font = wLogsFont }
+    private[this] val cPassword = new PasswordField { font = wLogsFont }
+    private[this] val cSurname = new TextField { font = wLogsFont }
+    private[this] val cName = new TextField { font = wLogsFont }
+    private[this] val cSchool = new TextField { font = wLogsFont }
+    private[this] val cClass = new TextField { font = wLogsFont }
     private[this] val cCreation = Button(r_creationButtonLabel) {
       register(cUsername.text, cPassword.password.mkString, cSurname.text,
         cName.text, cSchool.text, cClass.text)
     }
     private[this] val cQuit = Button(r_quitButtonLabel) { back }
+    cCreation.font = logsFont
+    cQuit.font = logsFont
 
     restrictHeight(cUsername)
     restrictHeight(cPassword)
@@ -610,50 +602,43 @@ object Frame {
     restrictHeight(cSchool)
     restrictHeight(cClass)
 
-    contents = new BoxPanel(Orientation.Vertical) {
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += new Label(r_usernameLabel)
-        contents += Swing.HStrut(5)
-        contents += cUsername
-      }
-      contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += new Label(r_passwordLabel)
-        contents += Swing.HStrut(5)
-        contents += cPassword
-      }
-      contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += new Label(r_surnameLabel)
-        contents += Swing.HStrut(5)
-        contents += cSurname
-      }
-      contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += new Label(r_nameLabel)
-        contents += Swing.HStrut(5)
-        contents += cName
-      }
-      contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
-        contents += new Label(r_schoolLabel)
-        contents += Swing.HStrut(5)
-        contents += cSchool
-      }
-      contents += Swing.VStrut(5)
+    contents = new BoxPanel(Orientation.Vertical){
       contents += new BoxPanel(Orientation.Horizontal){
-        contents += cClassLabel
-        contents == Swing.HStrut(5)
-        contents += cClass
+        contents += new BoxPanel(Orientation.Vertical){
+          contents += new Label(r_usernameLabel){ font = logsFont }
+          contents += Swing.VStrut(9)
+          contents += new Label(r_passwordLabel){ font = logsFont }
+          contents += Swing.VStrut(9)
+          contents += new Label(r_surnameLabel){ font = logsFont }
+          contents += Swing.VStrut(9)
+          contents += new Label(r_nameLabel){ font = logsFont }
+          contents += Swing.VStrut(9)
+          contents += new Label(r_schoolLabel){ font = logsFont }
+          contents += Swing.VStrut(9)
+          contents += new Label(r_optionalLabelStudent) { font = logsFont }
+        }
+        contents += Swing.HStrut(15)
+        contents += new BoxPanel(Orientation.Vertical){
+          contents += cUsername
+          contents += Swing.VStrut(5)
+          contents += cPassword
+          contents += Swing.VStrut(5)
+          contents += cSurname
+          contents += Swing.VStrut(5)
+          contents += cName
+          contents += Swing.VStrut(5)
+          contents += cSchool
+          contents += Swing.VStrut(5)
+          contents += cClass
+        }
       }
-      contents += Swing.VStrut(5)
-      contents += new BoxPanel(Orientation.Horizontal) {
+      contents += new BoxPanel(Orientation.Horizontal){
         contents += cQuit
         contents += Swing.HGlue
         contents += cCreation
       }
 
-      border = Swing.EmptyBorder(10, 10, 10, 10)
+      border = Swing.EmptyBorder(15, 15, 15, 15)
       xyAlign(contents)
     }
 
@@ -687,8 +672,8 @@ object Frame {
     preferredSize = new Dimension(300, 150)
     resizable = false
 
-    private[this] val usernameField = new TextField { font = logsFont }
-    private[this] val passwordField = new PasswordField { font = logsFont }
+    private[this] val usernameField = new TextField { font = wLogsFont }
+    private[this] val passwordField = new PasswordField { font = wLogsFont }
     restrictHeight(usernameField)
     restrictHeight(passwordField)
 
