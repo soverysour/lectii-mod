@@ -43,14 +43,8 @@ object Defaults {
     val s_pastTests: String = "Teste date"
     val s_changeModule: String = "Schimba lectia"
 
-    def s_formatAverage: String = s"Nota medie a dumneavoastra este ${Holder.getStats._2}."
-    def s_formatPercentage: String = s"Lectia curenta este ${Holder.getStats._1}% completa."
-
     val p_title: String = "Admin"
 
-    val t_completeSpaceSaying: String = "Completeaza spatiul liber sub fiecare enunt cu varianta corespunzatoare."
-    val t_chooseVariantSaying: String = "Alege varianta corecta/variantele corecte de sub fiecare enunt."
-    val t_dragDropSaying: String = "Alege, pentru fiecare element din stanga, elementul din dreapta corespunzator"
     val t_finishButton: String = "Am terminat"
     val t_closeDialogMessage: String = "Esti sigur ca progresul pana acum e definitiv? Decizia nu se poate revoca."
     val t_closeDialogTitle: String = "Atentie"
@@ -70,12 +64,12 @@ object Defaults {
     val id_name: Int = 3
     val id_school: Int = 4
     val id_optional: Int = 5
-    val id_status: Int = 6
 
     val settingName: String = "S"
     val materialName: String = "M"
     val testName: String = "T"
-    val galleryName: String = "G"
+
+    val nonExisting: String = "null"
 
     val defaultSeparator: String = "##"
     val powerSeparator: String = s"${defaultSeparator}${defaultSeparator}"
@@ -88,21 +82,21 @@ object Defaults {
     val good: String = "V"
     val bad: String = "P"
 
-    val studentMark: String = "e"
-    val professorMark: String = "p"
+    val studentMark = "student"
+    val professorMark = "professor"
   }
 
   object Paths {
     val homePath: String = s"${System.getProperty("user.home")}/Draconis/"
     val usersPath: String = s"${homePath}users.txt"
     val modulePath: String = s"${homePath}modules.txt"
+    val typePath: String = s"${homePath}channel.txt"
 
     def homeModulePath: String = s"${homePath}${Holder.getModule}/"
     def settingsPath: String = s"${homeModulePath}settings.txt"
     def dictionaryPath: String = s"${homeModulePath}dictionary.txt"
     def materialPath: String = s"${homeModulePath}material/"
     def testPath: String = s"${homeModulePath}test/"
-    def galleryPath: String = s"${homeModulePath}gallery/"
     def progressPath: String = s"${homeModulePath}progress/"
   }
 
@@ -111,8 +105,7 @@ object Defaults {
 
     def m_isVerified(s: String): Boolean = s.drop(3).startsWith(Names.good)
     def m_prettify(s: String): String = s.toLowerCase.trim
-    def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0"
-      else (sum/n).toString
+    def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
   }
 
   object ProcessAccountsSettings {
@@ -123,11 +116,7 @@ object Defaults {
 
     def a_isProperEntry(s: String): Boolean = s.contains(Names.defaultSeparator)
     def a_splitData(s: String): Array[String] = s.split(Names.defaultSeparator)
-    def a_formatData(s: List[String]): String = {
-      var alfa = ""
-      for ( x <- s ) alfa = s"${alfa}${Names.defaultSeparator}${x}"
-      alfa.drop(Names.defaultSeparator.size)
-    }
+    def a_formatData(s: List[String]): String = (for ( x <- s ) yield s"${Names.defaultSeparator}${x}").mkString.drop(Names.defaultSeparator.size)
   }
 
   object ProcessDictionaryEntries {
@@ -141,12 +130,8 @@ object Defaults {
     def d_getTotal(s: String): Double = s.split(Names.defaultSeparator)(4).split("[/]")(1).toDouble
 
     def d_formatScore(i: Double, j: Double): String = s"${i}/${j}"
-    def d_formatEntry(id: String, discr: Int, user: String, score: String) : String = {
-      s"${Names.testName}${Names.defaultSeparator}${id}${Names.defaultSeparator}${discr}${Names.defaultSeparator}${user}${Names.defaultSeparator}${score}\n"
-    }
-    def d_formatPath(id: String, discr: Int, username: String): String = {
-      s"${Paths.progressPath}${Names.testName}--${id}--${discr}--${username}"
-    }
+    def d_formatEntry(id: String, discr: Int, score: String) : String = s"${Names.testName}${Names.defaultSeparator}${id}${Names.defaultSeparator}${discr}${Names.defaultSeparator}${Holder.getUser.username}${Names.defaultSeparator}${score}\n"
+    def d_formatPath(id: String, discr: Int): String = s"${Paths.progressPath}${Names.testName}--${id}--${discr}--${Holder.getUser.username}"
   }
 
   object ProcessTestEntries {
@@ -154,17 +139,20 @@ object Defaults {
     def t_getStatus(s: String): String = s.drop(3).take(1)
     def t_getName(s: String): String = s.drop(5).split(Names.powerSeparator)(0)
     def t_getSolution(s: String): String = s.drop(5).split(Names.powerSeparator)(1)
+    def t_hasSolution(s: String): Boolean = s.drop(5).split(Names.powerSeparator).size > 1
+    def t_splitPro(s: String): Array[String] = s.split(Names.powerSeparator)
+    def t_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
+    def t_isSelected(s: String): Boolean = s.endsWith(Names.defaultIdentifier)
+    def t_getOption(s: String): String = s.dropRight(Names.defaultIdentifier.size)
+
+    def t_isHeader(s: String): Boolean = {
+      if (s.trim == Names.chooseVariant || s.trim == Names.dragDrop || s.trim == Names.completeSpace) true
+      else false
+    }
 
     def t_format(info: String, ask: String, ans: String, good: Boolean, kind: String): String = if (good)
       s"${info}${kind}:${Names.good}:${ask}${Names.powerSeparator}${ans}\n"
     else s"${info}${kind}:${Names.bad}:${ask}${Names.powerSeparator}${ans}\n"
-  }
-  object ProcessRawTest {
-    def r_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
-    def r_isHeader(s: String): Boolean = {
-      if (s.trim == Names.chooseVariant || s.trim == Names.dragDrop || s.trim == Names.completeSpace) true
-      else false
-    }
   }
 
 }
