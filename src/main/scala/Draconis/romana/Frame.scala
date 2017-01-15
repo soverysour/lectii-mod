@@ -3,7 +3,7 @@ package Draconis.romana
 import scala.swing._
 import scala.swing.event._
 import scala.util.Random
-import java.awt.{ Color, BasicStroke, Font }
+import java.awt.{ Color, BasicStroke, Font, RenderingHints }
 import java.lang.Error
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 import scala.collection.mutable.{ Set, ListBuffer }
@@ -29,19 +29,20 @@ object Frame {
     else throw new Error("Conturile tip profesor nu au functionalitate, inca.")
   }
 
-  private[this] def xAlign(s: scala.collection.mutable.Buffer[Component]): Unit = s.foreach( x => {x.xLayoutAlignment = 0; x.yLayoutAlignment = 0})
+  def initial(): Unit = loginFr = new LoginFrame
+  def refreshElev(): Unit = if ( elevFr != null ) elevFr.refresh
+
+  private[this] def xyAlign(s: scala.collection.mutable.Buffer[Component]): Unit = s.foreach( x => {x.xLayoutAlignment = 0; x.yLayoutAlignment = 0})
   private[this] def restrictHeight(s: Component): Unit = s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
   private[this] def restrictWidth(s: Component): Unit = s.maximumSize = new Dimension(s.preferredSize.height, Short.MaxValue)
   private[this] def restrictSize(s: Component): Unit = s.maximumSize = new Dimension(s.preferredSize.width, s.preferredSize.height)
 
-  def initial(): Unit = loginFr = new LoginFrame
-  def refreshElev(): Unit = if ( elevFr != null ) elevFr.refresh
-
   private[this] val logsFont = new Font(Font.MONOSPACED, Font.BOLD, 14)
-  private[this] val menuFont = new Font(Font.MONOSPACED, Font.PLAIN, 14)
+  private[this] val menuFont = new Font(Font.MONOSPACED, Font.BOLD, 15)
   private[this] val moduleFont = new Font(Font.MONOSPACED, Font.PLAIN, 18)
   private[this] val headerFont = new Font(Font.MONOSPACED, Font.PLAIN, 28)
   private[this] val componentFont = new Font(Font.MONOSPACED, Font.PLAIN, 15)
+  private[this] val endFont = new Font(Font.MONOSPACED, Font.BOLD, 16)
 
   class ModuleFrame extends MainFrame {
     title = m_title
@@ -53,7 +54,7 @@ object Frame {
       restrictHeight(x)
       x.font = moduleFont
     })
-    var ss = new Dimension(0, 0)
+    var ss = new Dimension(200, 0)
     val mod = modules.toList
 
     contents = new BoxPanel(Orientation.Vertical) {
@@ -84,7 +85,10 @@ object Frame {
     preferredSize = new Dimension(800, 600)
 
     private[this] def processEntry(s: String): List[Component] = {
-      if ( t_getType(s) == completeSpace || t_getType(s) == dragDrop) List(new Label(t_getName(s) + "  -->  " + t_getSolution(s)) { font = componentFont; })
+      if ( t_getType(s) == completeSpace || t_getType(s) == dragDrop ){
+        if ( t_hasSolution(s) ) List(new Label(t_getName(s) + "  -->  " + t_getSolution(s)) { font = componentFont })
+        else List()
+      }
       else {
         val ask = new Label(t_getName(s)) { font = componentFont; background = Color.white }
         var something = List[CheckBox]()
@@ -98,48 +102,58 @@ object Frame {
 
     val (good, bad) = Core.getResults(test.split("[|]")(0).trim, discr).partition(m_isVerified(_))
 
-    contents = new BoxPanel(Orientation.Vertical){
-      contents += new Label(tt_bad){ font = headerFont }
-      contents += Swing.VStrut(15)
-
-      bad.foreach( x => {
-        val returned = processEntry(x)
-        if ( returned.size > 1 ){
-          contents += returned(0)
-          val box = new BoxPanel(Orientation.Horizontal)
-          for ( ss <- 1 until returned.size ){
-            box.contents += returned(ss)
-            box.contents += Swing.HStrut(5)
-          }
-          restrictSize(box)
-          box.background = Color.white
-          contents += box
-        }
-        else contents += returned(0)
+    contents = new ScrollPane {
+      contents = new BoxPanel(Orientation.Vertical){
+        contents += new Label(tt_bad){ font = headerFont }
         contents += Swing.VStrut(15)
-      })
-      contents += new Label(tt_good){ font = headerFont }
-      contents += Swing.VStrut(15)
-      good.foreach( x => {
-        val returned = processEntry(x)
-        if ( returned.size > 1 ){
-          contents += returned(0)
-          val box = new BoxPanel(Orientation.Horizontal)
-          for ( ss <- 1 until returned.size ){
-            box.contents += returned(ss)
-            box.contents += Swing.HStrut(5)
-          }
-          restrictSize(box)
-          box.background = Color.white
-          contents += box
-        }
-        else contents += returned(0)
-        contents += Swing.VStrut(15)
-      })
 
-      xAlign(contents)
+        bad.foreach( x => {
+          val returned = processEntry(x)
+          if ( returned.size > 1 ){
+            contents += returned(0)
+            val box = new BoxPanel(Orientation.Horizontal)
+            for ( ss <- 1 until returned.size ){
+              box.contents += returned(ss)
+              box.contents += Swing.HStrut(5)
+            }
+            restrictSize(box)
+            box.background = Color.white
+            contents += box
+            contents += Swing.VStrut(15)
+          }
+          else if ( returned.size > 0 ){
+            contents += returned(0)
+            contents += Swing.VStrut(15)
+          }
+        })
+        contents += Swing.VStrut(15)
+        contents += new Label(tt_good){ font = headerFont }
+        contents += Swing.VStrut(15)
+        good.foreach( x => {
+          val returned = processEntry(x)
+          if ( returned.size > 1 ){
+            contents += returned(0)
+            val box = new BoxPanel(Orientation.Horizontal)
+            for ( ss <- 1 until returned.size ){
+              box.contents += returned(ss)
+              box.contents += Swing.HStrut(5)
+            }
+            restrictSize(box)
+            box.background = Color.white
+            contents += box
+            contents += Swing.VStrut(15)
+          }
+          else if ( returned.size > 0 ){
+            contents += returned(0)
+            contents += Swing.VStrut(15)
+          }
+        })
+
+        xyAlign(contents)
+        background = Color.white
+        border = Swing.EmptyBorder(15, 15, 15, 15)
+      }
       background = Color.white
-      border = Swing.EmptyBorder(15, 15, 15, 15)
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -155,12 +169,21 @@ object Frame {
   class InstanceFrame(n: String) extends MainFrame {
     title = if_title
     resizable = true
-    preferredSize = new Dimension(400, 300)
+    preferredSize = new Dimension(500, 500)
 
-    contents = new FlowPanel {
-      Core.testInstances(n).foreach( x => {
-        contents += Button(x._1){ goTo(x._1, x._2) }
-      })
+    contents = new ScrollPane {
+      contents = new BoxPanel(Orientation.Vertical) {
+        val instances = Core.testInstances(n)
+        for ( x <- 0 until instances.size ){
+          val button = Button(instances(x)._1){ goTo(instances(x)._1, instances(x)._2) }
+          button.font = componentFont
+          contents += button
+          if ( x < instances.size - 1 ) contents += Swing.VStrut(5)
+        }
+        background = Color.white
+        border = Swing.EmptyBorder(15, 15, 15, 15)
+      }
+      background = Color.white
     }
 
     private[this] def goTo(test: String, discr: String): Unit = {
@@ -181,12 +204,21 @@ object Frame {
   class ReviewFrame extends MainFrame {
     title = rf_title
     resizable = true
-    preferredSize = new Dimension(400, 300)
+    preferredSize = new Dimension(500, 500)
 
     contents = new ScrollPane{
-      contents = new FlowPanel {
-        Holder.getTests.foreach( x => contents += Button(x.name){ sweep(x.name) } )
+      contents = new BoxPanel(Orientation.Vertical) {
+        val instances = Holder.getTests
+        for ( x <- 0 until instances.size ){
+          val button = Button(instances(x).name){ sweep(instances(x).name) }
+          button.font = componentFont
+          contents += button
+          if ( x < instances.size - 1 ) contents += Swing.VStrut(5)
+        }
+        background = Color.white
+        border = Swing.EmptyBorder(15, 15, 15, 15)
       }
+      background = Color.white
     }
 
     peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
@@ -208,48 +240,58 @@ object Frame {
 
     title = a
     resizable = true
-    preferredSize = new Dimension(800, 600)
+    preferredSize = new Dimension(800, 300)
 
-    private[this] var percentage = new Label(s_formatPercentage)
-    private[this] var average = new Label(s_formatAverage)
+    private[this] def formatAverage: String = s"Nota medie a dumneavoastra este ${Holder.getStats._2}."
+    private[this] def formatPercentage: String = s"Lectia curenta este ${Holder.getStats._1}% completa."
+    private[this] var average = new Label(formatAverage){ font = menuFont }
+    private[this] var percentage = new Label(formatPercentage){ font = menuFont }
 
     def refresh(): Unit = {
-      percentage.text = s_formatPercentage
-      average.text = s_formatAverage
+      percentage.text = formatPercentage
+      average.text = formatAverage
     }
 
     contents = new TabbedPane() {
       pages += new TabbedPane.Page(s_materialTab, new ScrollPane{
         contents = new FlowPanel {
           Holder.getInfo.foreach(x => {
-            contents += Button(x.name) { open(materialName, x.name) }
+            val button = Button(x.name) { open(materialName, x.name) }
+            button.font = menuFont
+            contents += button
           })
           border = Swing.EmptyBorder(15, 15, 15, 15)
           background = Color.white
         }
-      })
+      }){font = menuFont}
       pages += new TabbedPane.Page(s_testTab, new ScrollPane{
         contents = new FlowPanel {
           Holder.getTests.foreach(x => {
-            contents += Button(x.name) { open(testName, x.name) }
+            val button = Button(x.name) { open(testName, x.name) }
+            button.font = menuFont
+            contents += button
           })
           border = Swing.EmptyBorder(15, 15, 15, 15)
           background = Color.white
         }
-      })
+      }){font = menuFont}
       pages += new TabbedPane.Page(s_profileTab, new BoxPanel(Orientation.Horizontal) {
         contents += new BoxPanel(Orientation.Vertical){
-          contents += Swing.VStrut(5)
-          contents += new Label(s"${s_profileUser}: ${Holder.getUser.username}")
-          contents += Swing.VStrut(5)
-          contents += new Label(s"${s_profileSurname}: ${Holder.getUser.surname}")
-          contents += Swing.VStrut(5)
-          contents += new Label(s"${s_profileName}: ${Holder.getUser.name}")
-          contents += Swing.VStrut(5)
-          contents += new Label(s"${s_profileSchool}: ${Holder.getUser.school}")
-          contents += Swing.VStrut(5)
-          contents += new Label(s"${s_profileClass}: ${Holder.getUser.optText}")
-          contents += Swing.VStrut(5)
+          contents += Swing.VStrut(10)
+          contents += new Label(s"${s_profileUser}: ${Holder.getUser.username}"){ font = menuFont }
+          contents += Swing.VStrut(10)
+          contents += new Label(s"${s_profileSurname}: ${Holder.getUser.surname}"){ font = menuFont }
+          contents += Swing.VStrut(10)
+          contents += new Label(s"${s_profileName}: ${Holder.getUser.name}"){ font = menuFont }
+          contents += Swing.VStrut(10)
+          contents += new Label(s"${s_profileSchool}: ${Holder.getUser.school}"){ font = menuFont }
+          contents += Swing.VStrut(10)
+          contents += new Label(s"${s_profileClass}: ${Holder.getUser.optText}"){ font = menuFont }
+          contents += Swing.VStrut(10)
+          xLayoutAlignment = 0
+          yLayoutAlignment = 0
+          background = Color.white
+          border = Swing.EmptyBorder(15, 15, 15, 15)
         }
         contents += new BoxPanel(Orientation.Vertical){
           contents += Swing.VStrut(10)
@@ -257,17 +299,25 @@ object Frame {
           contents += Swing.VStrut(10)
           contents += average
           contents += Swing.VStrut(10)
-          contents += Button(s_pastTests){ changeToReview }
+          var button = Button(s_pastTests){ changeToReview }
+          button.font = menuFont
+          contents += button
           contents += Swing.VStrut(10)
-          contents += Button(s_changeModule){
+          button = Button(s_changeModule){
             close
             moduleFr = new ModuleFrame
           }
+          button.font = menuFont
+          contents += button
           contents += Swing.VStrut(10)
+          xLayoutAlignment = 0
+          yLayoutAlignment = 0
+          background = Color.white
+          border = Swing.EmptyBorder(15, 15, 15, 15)
         }
         border = Swing.EmptyBorder(15, 15, 15, 15)
         background = Color.white
-      })
+      }){font = menuFont}
     }
 
     centerOnScreen
@@ -301,56 +351,51 @@ object Frame {
     contents = new ScrollPane {
       contents = new BoxPanel(Orientation.Vertical) {
         for (problem <- source.problems) {
-
           if (problem.kind == completeSpace) {
-            contents += new Label(t_completeSpaceSaying)
             contents += Swing.VStrut(10)
 
             for (workSample <- problem.workload) {
-              contents += new Label(workSample._1)
+              contents += new Label(workSample._1){font = menuFont}
               contents += Swing.VStrut(5)
-              emptySpaces = (workSample._1, new TextField) :: emptySpaces
+              emptySpaces = workSample._1 -> new TextField{columns = 20; background = Color.white; foreground = Color.black; font = menuFont} :: emptySpaces
 
-              emptySpaces(0)._2.text = "O variantaasdfasdasdasdas"
               restrictSize(emptySpaces(0)._2)
-              emptySpaces(0)._2.text = ""
 
               contents += emptySpaces(0)._2
               contents += Swing.VStrut(5)
             }
             contents += Swing.VStrut(10)
           } else if (problem.kind == chooseVariant) {
-            contents += new Label(t_chooseVariantSaying)
             contents += Swing.VStrut(10)
 
             for (workSample <- problem.workload) {
-              contents += new Label(workSample._1)
+              contents += new Label(workSample._1){font = menuFont}
               contents += Swing.VStrut(5)
 
               contents += new BoxPanel(Orientation.Horizontal) {
                 checkBoxes.+=:(workSample._1 -> List())
                 for (variant <- t_splitAns(workSample._2)) {
-                  if (variant.endsWith(defaultIdentifier)) {
-                    checkBoxes(0) = (checkBoxes(0)._1 -> (new CheckBox(variant.dropRight(defaultIdentifier.size)) :: checkBoxes(0)._2))
+                  if (t_isSelected(variant)) {
+                    checkBoxes(0) = checkBoxes(0)._1 -> (new CheckBox(t_getOption(variant)){font = menuFont; background = Color.white; foreground = Color.black} :: checkBoxes(0)._2)
                     contents += checkBoxes(0)._2(0)
                     contents += Swing.HStrut(5)
                   } else {
-                    checkBoxes(0) = (checkBoxes(0)._1 -> (new CheckBox(variant) :: checkBoxes(0)._2))
+                    checkBoxes(0) = checkBoxes(0)._1 -> (new CheckBox(variant){font = menuFont; background = Color.white; foreground = Color.black} :: checkBoxes(0)._2)
                     contents += checkBoxes(0)._2(0)
                     contents += Swing.HStrut(5)
                   }
                 }
+                background = Color.white
               }
               contents += Swing.VStrut(5)
             }
             contents += Swing.VStrut(10)
           } else if (problem.kind == dragDrop) {
-            contents += new Label(t_dragDropSaying)
             contents += Swing.VStrut(10)
 
             var dragDrops = List[(ToggleButton, ToggleButton)]()
 
-            for (workSample <- problem.workload) dragDrops = new ToggleButton(workSample._1) -> new ToggleButton(workSample._2) :: dragDrops
+            for (workSample <- problem.workload) dragDrops = new ToggleButton(workSample._1){font = menuFont} -> new ToggleButton(workSample._2){font = menuFont} :: dragDrops
             val left = Random.shuffle(dragDrops.map(x => x._1).filter(x => x.text != nonExisting))
             val right = Random.shuffle(dragDrops.map(x => x._2).filter(x => x.text != nonExisting))
 
@@ -365,6 +410,8 @@ object Frame {
                 contents += Swing.VStrut(5)
                 listenTo(x)
               })
+              background = Color.white
+              border = Swing.EmptyBorder(5, 5, 5, 5)
             }
             restrictSize(leftPanel)
 
@@ -375,6 +422,8 @@ object Frame {
                 contents += Swing.VStrut(5)
                 listenTo(x)
               })
+              background = Color.white
+              border = Swing.EmptyBorder(5, 5, 5, 5)
             }
             restrictSize(rightPanel)
 
@@ -391,6 +440,8 @@ object Frame {
 
               override def paintComponent(g: Graphics2D): Unit = {
                 g.clearRect(0, 0, size.width, size.height)
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
                 g.setColor(Color.white)
                 g.fillRect(0, 0, size.width, size.height)
@@ -461,18 +512,23 @@ object Frame {
               contents += drawPanel
               contents += Swing.HStrut(15)
               contents += rightPanel
+
+              background = Color.white
             }
           }
         }
-        xAlign(contents)
+        xyAlign(contents)
 
-        contents += Button(t_finishButton) { closeOperation }
-
+        contents += Swing.VStrut(15)
+        val button = Button(t_finishButton) { closeOperation }
+        button.font = endFont
+        contents += button
         contents.foreach(_ match {
           case x: BoxPanel => restrictSize(x)
           case _           => {}
         })
 
+        background = Color.white
         border = Swing.EmptyBorder(10, 10, 10, 10)
       }
     }
@@ -598,7 +654,7 @@ object Frame {
       }
 
       border = Swing.EmptyBorder(10, 10, 10, 10)
-      xAlign(contents)
+      xyAlign(contents)
     }
 
     centerOnScreen
@@ -631,17 +687,17 @@ object Frame {
     preferredSize = new Dimension(300, 150)
     resizable = false
 
-    private[this] val usernameField = new TextField { font = logsFont; }
-    private[this] val passwordField = new PasswordField { font = logsFont; }
+    private[this] val usernameField = new TextField { font = logsFont }
+    private[this] val passwordField = new PasswordField { font = logsFont }
     restrictHeight(usernameField)
     restrictHeight(passwordField)
 
     contents = new BoxPanel(Orientation.Vertical){
       contents += new BoxPanel(Orientation.Horizontal){
         contents += new BoxPanel(Orientation.Vertical) {
-          contents += new Label(l_usernameLabel){ font = logsFont; }
+          contents += new Label(l_usernameLabel){ font = logsFont }
           contents += Swing.HStrut(15)
-          contents += new Label(l_passwordLabel){ font = logsFont;}
+          contents += new Label(l_passwordLabel){ font = logsFont }
         }
         contents += Swing.VStrut(5)
         contents += new BoxPanel(Orientation.Vertical) {
@@ -662,7 +718,7 @@ object Frame {
           contents += button
         }
       }
-      xAlign(contents)
+      xyAlign(contents)
       border = Swing.EmptyBorder(15, 15, 15, 15)
     }
 

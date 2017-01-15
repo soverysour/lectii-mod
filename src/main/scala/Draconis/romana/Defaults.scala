@@ -43,14 +43,8 @@ object Defaults {
     val s_pastTests: String = "Teste date"
     val s_changeModule: String = "Schimba lectia"
 
-    def s_formatAverage: String = s"Nota medie a dumneavoastra este ${Holder.getStats._2}."
-    def s_formatPercentage: String = s"Lectia curenta este ${Holder.getStats._1}% completa."
-
     val p_title: String = "Admin"
 
-    val t_completeSpaceSaying: String = "Completeaza spatiul liber sub fiecare enunt cu varianta corespunzatoare."
-    val t_chooseVariantSaying: String = "Alege varianta corecta/variantele corecte de sub fiecare enunt."
-    val t_dragDropSaying: String = "Alege, pentru fiecare element din stanga, elementul din dreapta corespunzator"
     val t_finishButton: String = "Am terminat"
     val t_closeDialogMessage: String = "Esti sigur ca progresul pana acum e definitiv? Decizia nu se poate revoca."
     val t_closeDialogTitle: String = "Atentie"
@@ -145,6 +139,7 @@ object Defaults {
     def t_getStatus(s: String): String = s.drop(3).take(1)
     def t_getName(s: String): String = s.drop(5).split(Names.powerSeparator)(0)
     def t_getSolution(s: String): String = s.drop(5).split(Names.powerSeparator)(1)
+    def t_hasSolution(s: String): Boolean = s.drop(5).split(Names.powerSeparator).size > 1
     def t_splitPro(s: String): Array[String] = s.split(Names.powerSeparator)
     def t_splitAns(s: String): Array[String] = s.split(Names.defaultSeparator)
     def t_isSelected(s: String): Boolean = s.endsWith(Names.defaultIdentifier)
