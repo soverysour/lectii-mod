@@ -554,8 +554,8 @@ object Frame {
 
   class MaterialFrame(source: Holder.Material) extends MainFrame {
     title = source.name
-    resizable = false
-    preferredSize = new Dimension(640, 480)
+    resizable = true
+    preferredSize = new Dimension(800, 600)
 
     contents = new ScrollPane {
       contents = new EditorPane("text/html", source.info) {
