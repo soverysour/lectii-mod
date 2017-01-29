@@ -106,6 +106,10 @@ object Defaults {
     def m_isVerified(s: String): Boolean = s.drop(3).startsWith(Names.good)
     def m_prettify(s: String): String = s.toLowerCase.trim
     def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
+    def m_truncate(s: String): String = if ( s.split("[.]").size > 1 ){
+      val b = s.split("[.]")(1)
+      s.split("[.]")(0) +"."+ b.take(2)
+    } else s
   }
 
   object ProcessAccountsSettings {

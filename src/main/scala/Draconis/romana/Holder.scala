@@ -5,6 +5,7 @@ import scala.util.Random
 import Defaults.ProcessAccountsSettings.a_splitData
 import Defaults.ProcessTestEntries.{ t_isHeader, t_splitPro }
 import Defaults.Names._
+import Defaults.Misc.m_truncate
 
 object Holder {
   private[this] var users: Map[String, Cont] = Map()
@@ -46,7 +47,7 @@ object Holder {
     catch { case _: Throwable => "" }
   }
 
-  def getStats: (String, String) = stats
+  def getStats: (String, String) = m_truncate(stats._1) -> m_truncate(stats._2)
   def setStats(left: String, right: String): Unit = stats = left -> right
 
   def getInfo: List[Material] = info.toList.sortWith(sortElem)
