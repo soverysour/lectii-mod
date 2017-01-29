@@ -173,7 +173,7 @@ object Frame {
 
     contents = new ScrollPane {
       contents = new BoxPanel(Orientation.Vertical) {
-        val instances = Core.testInstances(n)
+        val instances = Core.testInstances(Holder.getExactTest(n).file)
         for ( x <- 0 until instances.size ){
           val button = Button(instances(x)._1){ goTo(instances(x)._1, instances(x)._2) }
           button.font = componentFont
@@ -320,12 +320,12 @@ object Frame {
     }
     private[this] def open(label: String, identity: String): Unit = {
       if (label == materialName){
-          elevFr.visible = false
-          materialFr = new MaterialFrame(Holder.getExactInfo(identity))
+        elevFr.visible = false
+        materialFr = new MaterialFrame(Holder.getExactInfo(identity))
       }
       else if (label == testName){
-          elevFr.visible = false
-          testFr = new TestFrame(Holder.getExactTest(identity))
+        elevFr.visible = false
+        testFr = new TestFrame(Holder.getExactTest(identity))
       }
     }
   }
@@ -451,22 +451,16 @@ object Frame {
                 g.setColor(Color.white)
                 g.fillRect(0, 0, size.width, size.height)
 
-                val (isLeft, isRight) = if ( left.size > right.size ) (0, 1) else (1, 0)
-                val addon = (if (isLeft == 1) left(0).locationOnScreen.getY - right(0).locationOnScreen.getY else left(0).locationOnScreen.getY - right(0).locationOnScreen.getY).toInt
-                val minusLeft = left(0).locationOnScreen.getY.toInt
-                val minusRight = right(0).locationOnScreen.getY.toInt
-                var contour = 1
+                val leftbias = left(0).locationOnScreen.getY.toInt - locationOnScreen.getY.toInt
+                val rightbias = right(0).locationOnScreen.getY.toInt - locationOnScreen.getY.toInt
 
                 g.setColor(Color.black)
-                left.foreach(x => g.fillOval(7, x.locationOnScreen.getY.toInt + addon * isLeft - minusLeft + contour * 15, 12, 12))
-                contour = 1
-                right.foreach(x => g.fillOval(187, x.locationOnScreen.getY.toInt + addon * isRight - minusRight + contour * 15, 12, 12))
+                left.foreach(x => g.fillOval(7, x.locationOnScreen.getY.toInt - locationOnScreen.getY.toInt + leftbias, 12, 12))
+                right.foreach(x => g.fillOval(187, x.locationOnScreen.getY.toInt - locationOnScreen.getY.toInt + rightbias, 12, 12))
 
-                contour = 1
                 g.setStroke(new BasicStroke(4))
                 leftToRight.foreach(x => {
-                  contour += 1
-                  g.drawLine(15, x._1.locationOnScreen.getY.toInt + 6 + addon * isLeft - minusLeft + contour * 15, 195, x._2.locationOnScreen.getY.toInt + 6 + addon * isRight - minusRight + contour * 15)
+                  g.drawLine(15, x._1.locationOnScreen.getY.toInt - locationOnScreen.getY.toInt + 6 + leftbias, 195, x._2.locationOnScreen.getY.toInt - locationOnScreen.getY.toInt + 6 + rightbias)
                 })
               }
             }

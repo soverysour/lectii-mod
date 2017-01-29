@@ -39,9 +39,9 @@ object Core {
       val Array(form, name, parameters) = s_splitData(x)
       val (fullName, level) = s_getName(parameters) -> s_getLevel(parameters)
       if (form == materialName)
-        Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level)
+        Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level, name)
       else if (form == testName)
-        Holder.addTest(readF(s"${testPath}${name}"), fullName, level)
+        Holder.addTest(readF(s"${testPath}${name}"), fullName, level, name)
       }
     )
     calculateStats
@@ -127,8 +127,8 @@ object Core {
     } info = t_format(info, workSample._1, "", false, problem.kind)
 
     val scoreRatio = d_formatScore(score, total)
-    writeF(dictionaryPath, d_formatEntry(id, discr, scoreRatio), true)
-    writeF(d_formatPath(id, discr), info, false)
+    writeF(dictionaryPath, d_formatEntry(exactTest.file, discr, scoreRatio), true)
+    writeF(d_formatPath(exactTest.file, discr), info, false)
 
     calculateStats
   }

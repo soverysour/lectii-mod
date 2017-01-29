@@ -55,15 +55,15 @@ object Holder {
 
   def getExactInfo(name: String): Material = {
     info.foreach(x => if (x.name == name) return x)
-    new Material(Array(), "", 0)
+    new Material(Array(), "", 0, "")
   }
   def getExactTest(name: String): Test = {
     tests.foreach(x => if (x.name == name) return x)
-    new Test(Array(), "", 0)
+    new Test(Array(), "", 0, "")
   }
 
-  def addMaterial(i: Array[String], name: String, level: Int): Unit = { info += new Material(i, name, level) }
-  def addTest(i: Array[String], name: String, level: Int): Unit = { tests += new Test(i, name, level) }
+  def addMaterial(i: Array[String], name: String, level: Int, file: String): Unit = { info += new Material(i, name, level, file) }
+  def addTest(i: Array[String], name: String, level: Int, file: String): Unit = { tests += new Test(i, name, level, file) }
 
   private[this] def sortElem(x1: ToSort, x2: ToSort): Boolean = {
     if (x1.level == x2.level) x1.name < x2.name
@@ -75,7 +75,7 @@ object Holder {
     val name: String
   }
 
-  class Test(sourceTest: Array[String], nume: String, nivel: Int) extends ToSort {
+  class Test(sourceTest: Array[String], nume: String, nivel: Int, id: String) extends ToSort {
     sealed class Exercitiu(gen: String, val ex: Set[String], sc: String) {
       val kind = gen
       val workload = Random.shuffle(for (x <- ex) yield (t_splitPro(x)(0), t_splitPro(x)(1)))
@@ -100,12 +100,14 @@ object Holder {
     val points = pp
     override val level: Int = nivel
     override val name: String = nume
+    val file = id
   }
 
-  class Material(sourceTest: Array[String], nume: String, nivel: Int) extends ToSort {
+  class Material(sourceTest: Array[String], nume: String, nivel: Int, id: String) extends ToSort {
     val info = sourceTest.mkString
     override val level: Int = nivel
     override val name: String = nume
+    val file = id
   }
 
   class Cont(val username: String, val password: String, val surname: String, val name: String,
