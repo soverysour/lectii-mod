@@ -171,7 +171,7 @@ object Core {
     .filter(d_getType(_) == testName)
     .filter(d_getUser(_) == Holder.getUser.username)
     .filter(d_getId(_) == n)
-    .sortWith(d_getScore(_) > d_getScore(_))
+    .sortWith(d_getDiscr(_) > d_getDiscr(_))
     .map( x => s"${d_getId(x)} | ${d_getResult(x)}" -> d_getDiscr(x) )
     .to[List]
 
