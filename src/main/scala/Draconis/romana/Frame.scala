@@ -50,7 +50,7 @@ object Frame {
     resizable = true
 
     private[this] var modules: Set[Button] = Set[Button]()
-    Holder.getModules.foreach(x => modules += Button(x){ sweep(x) } )
+    Holder.getModules.foreach(x => modules += Button(x._2){ sweep(x._1) } )
     modules.foreach(x => {
       restrictHeight(x)
       x.font = moduleFont
@@ -386,7 +386,7 @@ object Frame {
 
             var dragDrops = List[(ToggleButton, ToggleButton)]()
 
-            for (workSample <- problem.workload) dragDrops = new ToggleButton(workSample._1){font = menuFont} -> new ToggleButton(workSample._2){font = menuFont} :: dragDrops
+            for (workSample <- problem.workload) dragDrops = new ToggleButton(workSample._1) -> new ToggleButton(workSample._2) :: dragDrops
             val left = Random.shuffle(dragDrops.map(x => x._1).filter(x => x.text != nonExisting))
             val right = Random.shuffle(dragDrops.map(x => x._2).filter(x => x.text != nonExisting))
 
@@ -396,11 +396,18 @@ object Frame {
 
             val leftPanel = new BoxPanel(Orientation.Vertical) {
               contents += Swing.VStrut(5)
-              left.foreach(x => {
-                contents += x
-                contents += Swing.VStrut(5)
-                listenTo(x)
-              })
+                left.foreach(x => {
+                  x.name = x.text
+                  x.text = "->"
+                  contents += new BoxPanel(Orientation.Horizontal){
+                    contents += new Label(x.name){background = Color.white; font = menuFont}
+                    contents += Swing.HStrut(5)
+                    contents += x
+                    background = Color.white
+                  }
+                  listenTo(x)
+                  contents += Swing.VStrut(5)
+                })
               background = Color.white
               border = Swing.EmptyBorder(5, 5, 5, 5)
             }
@@ -408,11 +415,18 @@ object Frame {
 
             val rightPanel = new BoxPanel(Orientation.Vertical) {
               contents += Swing.VStrut(5)
-              right.foreach(x => {
-                contents += x
-                contents += Swing.VStrut(5)
-                listenTo(x)
-              })
+                right.foreach(x => {
+                  x.name = x.text
+                  x.text = "<-"
+                  contents += new BoxPanel(Orientation.Horizontal){
+                    contents += x
+                    contents += Swing.HStrut(5)
+                    contents += new Label(x.name){background = Color.white; font = menuFont}
+                    background = Color.white
+                  }
+                  listenTo(x)
+                  contents += Swing.VStrut(5)
+                })
               background = Color.white
               border = Swing.EmptyBorder(5, 5, 5, 5)
             }
@@ -439,14 +453,20 @@ object Frame {
 
                 val (isLeft, isRight) = if ( left.size > right.size ) (0, 1) else (1, 0)
                 val addon = (if (isLeft == 1) left(0).locationOnScreen.getY - right(0).locationOnScreen.getY else left(0).locationOnScreen.getY - right(0).locationOnScreen.getY).toInt
+                val minusLeft = left(0).locationOnScreen.getY.toInt
+                val minusRight = right(0).locationOnScreen.getY.toInt
+                var contour = 1
 
                 g.setColor(Color.black)
-                left.foreach(x => g.fillOval(0, x.location.getY.toInt + addon * isLeft, 12, 12))
-                right.foreach(x => g.fillOval(180, x.location.getY.toInt + addon * isRight, 12, 12))
+                left.foreach(x => g.fillOval(7, x.locationOnScreen.getY.toInt + addon * isLeft - minusLeft + contour * 15, 12, 12))
+                contour = 1
+                right.foreach(x => g.fillOval(187, x.locationOnScreen.getY.toInt + addon * isRight - minusRight + contour * 15, 12, 12))
 
+                contour = 1
                 g.setStroke(new BasicStroke(4))
                 leftToRight.foreach(x => {
-                  g.drawLine(6, x._1.location.getY.toInt + 6 + addon * isLeft, 186, x._2.location.getY.toInt + 6 + addon * isRight)
+                  contour += 1
+                  g.drawLine(15, x._1.locationOnScreen.getY.toInt + 6 + addon * isLeft - minusLeft + contour * 15, 195, x._2.locationOnScreen.getY.toInt + 6 + addon * isRight - minusRight + contour * 15)
                 })
               }
             }
@@ -538,9 +558,9 @@ object Frame {
         val newSpaces = emptySpaces.map(x => x._1 -> x._2.text)
         var newChecks = List[(String, List[(String, Boolean)])]()
         checkBoxes.foreach(x => {
-          newChecks = (x._1 -> x._2.map(y => (y.text, y.selected))) :: newChecks
+          newChecks = (x._1 -> x._2.map(y => (y.text -> y.selected))) :: newChecks
         })
-        val leftRights = leftToRight.map(x => (x._1.text, x._2.text)).toList
+        val leftRights = leftToRight.map(x => (x._1.name -> x._2.name)).toList
 
         close
         elevFr.visible = true

@@ -87,17 +87,22 @@ object Defaults {
   }
 
   object Paths {
-    val homePath: String = s"${System.getProperty("user.home")}/Draconis/"
+    val delimiter: String = {
+      if (System.getProperty("os.name").toLowerCase.contains("linux")) "/"
+      else "\\"
+    }
+
+    val homePath: String = s"${System.getProperty("user.home")}${delimiter}Draconis${delimiter}"
     val usersPath: String = s"${homePath}users.txt"
     val modulePath: String = s"${homePath}modules.txt"
     val typePath: String = s"${homePath}channel.txt"
 
-    def homeModulePath: String = s"${homePath}${Holder.getModule}/"
+    def homeModulePath: String = s"${homePath}${Holder.getModule}${delimiter}"
     def settingsPath: String = s"${homeModulePath}settings.txt"
     def dictionaryPath: String = s"${homeModulePath}dictionary.txt"
-    def materialPath: String = s"${homeModulePath}material/"
-    def testPath: String = s"${homeModulePath}test/"
-    def progressPath: String = s"${homeModulePath}progress/"
+    def materialPath: String = s"${homeModulePath}material${delimiter}"
+    def testPath: String = s"${homeModulePath}test${delimiter}"
+    def progressPath: String = s"${homeModulePath}progress${delimiter}"
   }
 
   object Misc {
@@ -106,6 +111,10 @@ object Defaults {
     def m_isVerified(s: String): Boolean = s.drop(3).startsWith(Names.good)
     def m_prettify(s: String): String = s.toLowerCase.trim
     def m_verifyAmount(sum: Double, n: Double): String = if ( (sum/n).toString == "NaN" ) "0" else (sum/n).toString
+    def m_truncate(s: String): String = if ( s.split("[.]").size > 1 ){
+      val b = s.split("[.]")(1)
+      s.split("[.]")(0) +"."+ b.take(2)
+    } else s
   }
 
   object ProcessAccountsSettings {

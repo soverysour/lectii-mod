@@ -21,7 +21,10 @@ object Core {
   def main(args: Array[String]): Unit = {
     if ( readF(typePath).mkString == studentMark ){
       Holder.loadUsers(readF(usersPath).filter(a_isProperEntry(_)))
-      Holder.loadModules(readF(modulePath))
+      val alfa = readF(modulePath).map( x => {
+        s_splitData(x)(0).trim -> s_splitData(x)(1).trim
+      }).toMap
+      Holder.loadModules(alfa)
       Holder.setType(studentMark)
     }
     else Holder.setType(professorMark)
@@ -168,7 +171,7 @@ object Core {
     .filter(d_getType(_) == testName)
     .filter(d_getUser(_) == Holder.getUser.username)
     .filter(d_getId(_) == n)
-    .sortWith(d_getScore(_) > d_getScore(_))
+    .sortWith(d_getDiscr(_) > d_getDiscr(_))
     .map( x => s"${d_getId(x)} | ${d_getResult(x)}" -> d_getDiscr(x) )
     .to[List]
 
