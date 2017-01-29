@@ -61,8 +61,9 @@ object Core {
     var total = 0.0
     var score = 0.0
     var info = ""
+    val exactTest = Holder.getExactTest(id)
 
-    readF(dictionaryPath).filter( _ != "" ).foreach( x => if (d_getId(x) == id) discr += 1 )
+    readF(dictionaryPath).filter( _ != "" ).foreach( x => if (d_getId(x) == exactTest.file) discr += 1 )
 
     val finalCheckboxes = newCh.map( x => {
       x._1 -> x._2.map( y => {
@@ -71,7 +72,6 @@ object Core {
       })
     })
 
-    val exactTest = Holder.getExactTest(id)
     total = exactTest.points
     for ( problem <- exactTest.problems ){
       if ( problem.kind == completeSpace ){
