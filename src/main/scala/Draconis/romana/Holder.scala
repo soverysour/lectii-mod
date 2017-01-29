@@ -11,7 +11,7 @@ object Holder {
   private[this] var settings: Map[String, String] = Map()
   private[this] var currentUser: Cont = _
   private[this] var currentModule: String = _
-  private[this] var moduleList: Array[String] = _
+  private[this] var moduleList: scala.collection.immutable.Map[String, String] = _
   private[this] var stats: (String, String) = _
   private[this] var spec: String = _
 
@@ -24,11 +24,11 @@ object Holder {
       users += (e(id_username) -> new Cont(e(id_username), e(id_password), e(id_surname), e(id_name), e(id_school), e(id_optional)))
     })
   }
-  def loadModules(s: Array[String]): Unit = moduleList = s
+  def loadModules(s: scala.collection.immutable.Map[String, String]): Unit = moduleList = s
   def setType(s: String): Unit = spec = s
   def getType: String = spec
 
-  def getModules: Array[String] = moduleList
+  def getModules: scala.collection.immutable.Map[String, String] = moduleList
   def getModule: String = currentModule
   def setModule(m: String): Unit = {
     currentModule = m

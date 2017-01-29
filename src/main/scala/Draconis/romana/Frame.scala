@@ -50,7 +50,7 @@ object Frame {
     resizable = true
 
     private[this] var modules: Set[Button] = Set[Button]()
-    Holder.getModules.foreach(x => modules += Button(x){ sweep(x) } )
+    Holder.getModules.foreach(x => modules += Button(x._2){ sweep(x._1) } )
     modules.foreach(x => {
       restrictHeight(x)
       x.font = moduleFont

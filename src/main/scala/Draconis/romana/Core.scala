@@ -21,7 +21,10 @@ object Core {
   def main(args: Array[String]): Unit = {
     if ( readF(typePath).mkString == studentMark ){
       Holder.loadUsers(readF(usersPath).filter(a_isProperEntry(_)))
-      Holder.loadModules(readF(modulePath))
+      val alfa = readF(modulePath).map( x => {
+        s_splitData(x)(0).trim -> s_splitData(x)(1).trim
+      }).toMap
+      Holder.loadModules(alfa)
       Holder.setType(studentMark)
     }
     else Holder.setType(professorMark)
