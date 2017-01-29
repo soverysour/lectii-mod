@@ -403,6 +403,7 @@ object Frame {
                     contents += new Label(x.name){background = Color.white; font = menuFont}
                     contents += Swing.HStrut(5)
                     contents += x
+                    contents += Swing.HStrut(5)
                     background = Color.white
                   }
                   listenTo(x)
@@ -419,6 +420,7 @@ object Frame {
                   x.name = x.text
                   x.text = "<-"
                   contents += new BoxPanel(Orientation.Horizontal){
+                    contents += Swing.HStrut(5)
                     contents += x
                     contents += Swing.HStrut(5)
                     contents += new Label(x.name){background = Color.white; font = menuFont}
