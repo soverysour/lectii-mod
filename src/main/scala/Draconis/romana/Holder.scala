@@ -31,6 +31,7 @@ object Holder {
 
   def getModules: scala.collection.immutable.Map[String, String] = moduleList
   def getModule: String = currentModule
+  def getModuleName: String = moduleList(currentModule)
   def setModule(m: String): Unit = {
     currentModule = m
 

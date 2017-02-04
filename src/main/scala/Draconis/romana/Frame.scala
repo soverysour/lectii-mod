@@ -234,7 +234,7 @@ object Frame {
   class StudentFrame(a: String) extends MainFrame {
     Core.initModule(a)
 
-    title = a
+    title = Holder.getModuleName
     resizable = true
     preferredSize = new Dimension(800, 300)
 
