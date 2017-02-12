@@ -42,6 +42,8 @@ object Core {
         Holder.addMaterial(readF(s"${materialPath}${name}"), fullName, level, name)
       else if (form == testName)
         Holder.addTest(readF(s"${testPath}${name}"), fullName, level, name)
+      else if (form == musicName)
+        Holder.addMusic(name, parameters)
       }
     )
     calculateStats

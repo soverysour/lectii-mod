@@ -12,9 +12,11 @@ object Holder {
   private[this] var settings: Map[String, String] = Map()
   private[this] var currentUser: Cont = _
   private[this] var currentModule: String = _
-  private[this] var moduleList: scala.collection.immutable.Map[String, String] = _
+  private[this] var moduleList: scala.collection.immutable.Map[String, String] = scala.collection.immutable.Map()
   private[this] var stats: (String, String) = _
   private[this] var spec: String = _
+
+  private[this] var music: List[(String, String)] = List()
 
   private[this] var info: Set[Material] = _
   private[this] var tests: Set[Test] = _
@@ -47,6 +49,9 @@ object Holder {
     try { users(arg).password }
     catch { case _: Throwable => "" }
   }
+
+  def getMusic: List[(String, String)] = music
+  def addMusic(n: String, k: String): Unit = music = (n, k) :: music
 
   def getStats: (String, String) = m_truncate(stats._1) -> m_truncate(stats._2)
   def setStats(left: String, right: String): Unit = stats = left -> right

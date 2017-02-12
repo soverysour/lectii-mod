@@ -5,12 +5,14 @@ import scala.swing.event._
 import scala.util.Random
 import java.awt.{ Color, BasicStroke, Font, RenderingHints }
 import java.lang.Error
+import javax.sound.sampled._
 import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
 import scala.collection.mutable.{ Set, ListBuffer }
 import Defaults.Frame._
 import Defaults.Names._
 import Defaults.Misc.m_isVerified
 import Defaults.ProcessTestEntries._
+import Defaults.Paths.materialPath
 
 object Frame {
   private[this] var loginFr: LoginFrame = _
@@ -22,6 +24,7 @@ object Frame {
   private[this] var reviewFr: ReviewFrame = _
   private[this] var instanceFr: InstanceFrame = _
   private[this] var takenTestFr: TakenTestFrame = _
+  private[this] var mplayerFr: PlayerFrame = _
 
   private[this] def commence(label: String): Unit = {
     loginFr.close
@@ -232,7 +235,9 @@ object Frame {
   }
 
   class StudentFrame(a: String) extends MainFrame {
-    Core.initModule(a)
+    Core.initModule(a) 
+
+    //mplayerFr = new PlayerFrame
 
     title = Holder.getModuleName
     resizable = true
@@ -568,6 +573,57 @@ object Frame {
     visible = true
   }
 
+  class PlayerFrame extends MainFrame {
+    title = pf_title
+    resizable = true
+    preferredSize = new Dimension(200, 100)
+    
+    private[this] var clip: Clip = _
+
+    private[this] var on = false
+    private[this] var which = 0
+
+    private[this] var next = Button(pf_next){ change(1) }
+    private[this] var previous = Button(pf_previous){ change(-1) }
+    private[this] var toggle = Button(pf_toggle){ 
+      if(Holder.getMusic.size > 0){
+        if(!on){
+          clip = AudioSystem.getClip
+          clip.open(AudioSystem.getAudioInputStream(new java.io.File("/home/mek/Draconis/Mod1/material/minion.wav")))
+          clip.start
+        }
+        else clip.stop
+      } 
+    }
+    private[this] var sname = new Label()
+
+    contents = new FlowPanel {
+      contents += sname
+      contents += previous
+      contents += next
+      contents += toggle
+
+      background = Color.white
+      border = Swing.EmptyBorder(5, 5, 5, 5)
+    }
+
+    private[this] def change(i: Int): Unit = {
+      if(Holder.getMusic.size == 0)
+        sname.text = pf_noSongs
+      else{
+        which += 1
+        if(which == Holder.getMusic.size)
+          which = 0
+        else if(which == 0)
+          which = Holder.getMusic.size - 1
+        sname.text = Holder.getMusic(which)._1
+      }
+    }
+    
+    centerOnScreen
+    visible = true
+  }
+
   class MaterialFrame(source: Holder.Material) extends MainFrame {
     title = source.name
     resizable = true
@@ -576,7 +632,7 @@ object Frame {
     contents = new ScrollPane {
       var neuInfo = source.info.split("[<][{]img[=]\"")
       for ( x <- 1 until neuInfo.size )
-        neuInfo(x) = "<img src=\"file://" + Defaults.Paths.materialPath + neuInfo(x)
+        neuInfo(x) = "<img src=\"file://" + materialPath + neuInfo(x)
 
       contents = new EditorPane("text/html", neuInfo.mkString) { 
         background = Color.white

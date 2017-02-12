@@ -55,6 +55,12 @@ object Defaults {
     val rf_title: String = "Tipuri de teste"
     val tt_good: String = "CORECT:"
     val tt_bad: String = "INCORECT:"
+
+    val pf_title: String = "Clipuri audio"
+    val pf_next: String = "Urmatorul"
+    val pf_previous: String = "Inapoi"
+    val pf_toggle: String = "Opreste/Porneste"
+    val pf_noSongs: String = "Lista goala"
   }
 
   object Names {
@@ -68,6 +74,7 @@ object Defaults {
     val settingName: String = "S"
     val materialName: String = "M"
     val testName: String = "T"
+    val musicName: String = "X"
 
     val nonExisting: String = "null"
 
