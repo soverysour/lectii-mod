@@ -10,6 +10,7 @@ repositories {
 dependencies {
   compile 'org.scala-lang:scala-library-all:2.12.0'
   compile 'commons-io:commons-io:2.5'
+  compile 'commons-codec:commons-codec:1.10'
 }
 
 tasks.withType(ScalaCompile) {

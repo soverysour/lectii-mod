@@ -1,6 +1,7 @@
 package Draconis.romana
 
 import org.apache.commons.io.FileUtils
+//import org.apache.commons.codec.binary.Base64
 import java.io.File
 import scala.collection.mutable.ListBuffer
 
@@ -14,7 +15,7 @@ import Defaults.ProcessAccountsSettings._
 object Core {
 
   private[this] def readF(path: String): Array[String] = FileUtils
-    .readFileToString(new File(path), encoding).split("\n")
+    .readFileToString(new File(path), encoding).mkString.split("\n")
   private[this] def writeF(path: String, data: String, append: Boolean): Unit = FileUtils
     .write(new File(path), data, encoding, append)
 
