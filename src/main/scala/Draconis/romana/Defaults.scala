@@ -87,7 +87,7 @@ object Defaults {
   }
 
   object Paths {
-    val delimiter: String = {
+    private[this] val delimiter: String = {
       if (System.getProperty("os.name").toLowerCase.contains("linux")) "/"
       else "\\"
     }

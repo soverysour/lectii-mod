@@ -574,7 +574,11 @@ object Frame {
     preferredSize = new Dimension(800, 600)
 
     contents = new ScrollPane {
-      contents = new EditorPane("text/html", source.info) {
+      var neuInfo = source.info.split("[<][{]img[=]\"")
+      for ( x <- 1 until neuInfo.size )
+        neuInfo(x) = "<img src=\"file://" + Defaults.Paths.materialPath + neuInfo(x)
+
+      contents = new EditorPane("text/html", neuInfo.mkString) { 
         background = Color.white
         foreground = Color.black
 
