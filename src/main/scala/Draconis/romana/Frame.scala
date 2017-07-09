@@ -589,7 +589,6 @@ object Frame {
       if(Holder.getMusic.size > 0){
         if(!on){
           clip = AudioSystem.getClip
-          clip.open(AudioSystem.getAudioInputStream(new java.io.File("/home/mek/Draconis/Mod1/material/minion.wav")))
           clip.start
         }
         else clip.stop

@@ -99,7 +99,7 @@ object Defaults {
       else "\\"
     }
 
-    val homePath: String = s"${System.getProperty("user.home")}${delimiter}Draconis${delimiter}"
+    val homePath: String = s"${System.getProperty("user.home")}${delimiter}lectii-mod${delimiter}"
     val usersPath: String = s"${homePath}users.txt"
     val modulePath: String = s"${homePath}modules.txt"
     val typePath: String = s"${homePath}channel.txt"
