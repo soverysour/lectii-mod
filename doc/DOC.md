@@ -11,13 +11,13 @@ un wrapper pentru libraria swing din Java. Foloseste Gradle ca si build tool.
 # Instalare # 
 Dependente: 
 
-    \- Java Runtime Environment ( o versiune cat mai noua )
+    - Java Runtime Environment ( o versiune cat mai noua )
 
-    \- Scala ( o versiune cat mai noua )
+    - Scala ( o versiune cat mai noua )
 
-    \- Gradle ( necesar o versiune >= 3.0 )
+    - Gradle ( necesar o versiune >= 3.0 )
 
-    \- git ( optional, pentru clonarea directa a repositoriului )
+    - git ( optional, pentru clonarea directa a repositoriului )
 
 
 Presupunand ca aveti git:
@@ -48,24 +48,24 @@ pentru a rula jar-ul asamblat, rulati `gradle runJar`.
 
 Intai, directoriul `lectii-mod` trebuie sa existe in HOME. Apoi:
 
-    \- Trebuie sa existe fisierul channel.txt cu textul `student`, in acest folder.
+    - Trebuie sa existe fisierul channel.txt cu textul `student`, in acest folder.
 
-    \- Fisierul users.txt trebuie sa existe, fie gol fie cu o lista de utilizatori precedenta
+    - Fisierul users.txt trebuie sa existe, fie gol fie cu o lista de utilizatori precedenta
 
-    \- Fisierul mod.txt trebuie sa existe, cu text de forma `NUME_DIRECTORIU####NUME_LECTIE`, unde NUME\_DIRECTORIU este 
+    - Fisierul mod.txt trebuie sa existe, cu text de forma `NUME_DIRECTORIU####NUME_LECTIE`, unde NUME\_DIRECTORIU este 
 numele fix al directoriului lectiei cu numele NUME\_LECTIE.
 
 Apoi, in fiecare directoriu tip lectie, trebuie sa existe: 
 
-    \- `dictionary.txt`, pentru stocarea inregistrarilor testelor precedente, date.
+    - `dictionary.txt`, pentru stocarea inregistrarilor testelor precedente, date.
 
-    \- `settings.txt`, cu inregistrari de forma: TIP####NUME\_FISIER####TITLU\_FISIER####NUMAR\_ORDINE, unde TIP poate fi 
+    - `settings.txt`, cu inregistrari de forma: TIP####NUME\_FISIER####TITLU\_FISIER####NUMAR\_ORDINE, unde TIP poate fi 
 M sau T, pentru Material ( lectie ) sau Test, respectiv, NUME\_FISIER este numele fizic al Testului / Lectiei, aflate in 
 directoarele test sau material, respectiv, unde TITLU\_FISIER este titlul care va aparea cand programul va fi rulat, 
 echivalent cu NUME\_LECTIE, iar NUMAR\_ORDINE este un numar de ordine pentru a ordona casutele in paginile lor din 
 program.
 
-    \- Directoarele test, progress si material, cu materiale / teste sau cu rezultatele de la teste.
+    - Directoarele test, progress si material, cu materiale / teste sau cu rezultatele de la teste.
 
 # Despre Materiale #
 
@@ -83,11 +83,11 @@ modificata, pentru a permite identificarea si construirea URL-ului local, astfel
 
 Un test poate avea trei "grupe" de exercitii:
 
-    \- CE = Complete the Empty space
+    - CE = Complete the Empty space
 
-    \- CV = Choose the correct Variant
+    - CV = Choose the correct Variant
 
-    \- DD = Drag and Drop
+    - DD = Drag and Drop
 
 
 Pentru inceperea oricarui chunk, se incepe cu unul dintre identificatorii de mai sus.
