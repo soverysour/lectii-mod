@@ -10,13 +10,9 @@ un wrapper pentru libraria swing din Java. Foloseste Gradle ca si build tool.
 
 # Instalare # 
 Dependente: 
-
     - Java Runtime Environment ( o versiune cat mai noua )
-
     - Scala ( o versiune cat mai noua )
-
     - Gradle ( necesar o versiune >= 3.0 )
-
     - git ( optional, pentru clonarea directa a repositoriului )
 
 
@@ -47,29 +43,22 @@ pentru a rula jar-ul asamblat, rulati `gradle runJar`.
 # Crearea de materiale #
 
 Intai, directoriul `lectii-mod` trebuie sa existe in HOME. Apoi:
-
     - Trebuie sa existe fisierul channel.txt cu textul `student`, in acest folder.
-
     - Fisierul users.txt trebuie sa existe, fie gol fie cu o lista de utilizatori precedenta
-
-    - Fisierul mod.txt trebuie sa existe, cu text de forma `NUME_DIRECTORIU####NUME_LECTIE`, unde NUME\_DIRECTORIU este 
-numele fix al directoriului lectiei cu numele NUME\_LECTIE.
+    - Fisierul mod.txt trebuie sa existe, cu text de forma `NUME_DIRECTORIU####NUME_LECTIE`, unde NUME_DIRECTORIU este 
+numele fix al directoriului lectiei cu numele NUME_LECTIE.
 
 Apoi, in fiecare directoriu tip lectie, trebuie sa existe: 
-
     - `dictionary.txt`, pentru stocarea inregistrarilor testelor precedente, date.
-
-    - `settings.txt`, cu inregistrari de forma: TIP####NUME\_FISIER####TITLU\_FISIER####NUMAR\_ORDINE, unde TIP poate fi 
-M sau T, pentru Material ( lectie ) sau Test, respectiv, NUME\_FISIER este numele fizic al Testului / Lectiei, aflate in 
-directoarele test sau material, respectiv, unde TITLU\_FISIER este titlul care va aparea cand programul va fi rulat, 
-echivalent cu NUME\_LECTIE, iar NUMAR\_ORDINE este un numar de ordine pentru a ordona casutele in paginile lor din 
-program.
-
     - Directoarele test, progress si material, cu materiale / teste sau cu rezultatele de la teste.
+    - `settings.txt`, cu inregistrari de forma: 
+
+TIP####NUME_FISIER####TITLU_FISIER####NUMAR_ORDINE, unde TIP poate fi M sau T, pentru Material ( lectie ) sau Test, respectiv, NUME_FISIER este numele fizic al Testului / Lectiei, aflate in directoarele test sau material, respectiv, unde TITLU_FISIER este titlul care va aparea cand programul va fi rulat, echivalent cu NUME_LECTIE, iar NUMAR_ORDINE este un numar de ordine pentru a ordona casutele in paginile lor din program.
+
 
 # Despre Materiale #
 
-Atunci cand un material este specificat in settings.txt, prin NUME\_FISIER, acelasi nume de material trebuie folosit si 
+Atunci cand un material este specificat in settings.txt, prin NUME_FISIER, acelasi nume de material trebuie folosit si 
 pentru un fisier in directorul material. Materialele pot folosi sintaxa HTML, dupa cum se poate vedea din modele.
 
 Atunci cand o poza locala, in acelasi directoriu, material, este mentionata intr-un material, acea sintaxa HTML trebuie 
@@ -82,20 +71,16 @@ modificata, pentru a permite identificarea si construirea URL-ului local, astfel
 # Despre Teste # 
 
 Un test poate avea trei "grupe" de exercitii:
-
     - CE = Complete the Empty space
-
     - CV = Choose the correct Variant
-
     - DD = Drag and Drop
-
 
 Pentru inceperea oricarui chunk, se incepe cu unul dintre identificatorii de mai sus.
 
 Indiferent de tipul de exercitiu, fiecare subexercitiu va incepe la fel, si anume:
 
 ```
-CERINTA\_ORICAT\_DE\_LUNGA####[solutii]
+CERINTA_ORICAT_DE_LUNGA####[solutii]
 ```
 
 Unde solutiile pot fi:
@@ -122,9 +107,11 @@ DD
 
 VARIANTA1####OPTIUNEA1
 VARIANTA2####OPTIUNEA2
-null####OPTIUNEA\_CAPCANA
+null####OPTIUNEA_CAPCANA
 OPTIUNEA_CAPCANA2####null
 ```
 
 Intr-un exercitiu de tip DD, fiecare subexercitiu doar adauga elemente la coloane. Un element `null` nu face altceva 
 decat sa adauge o varianta capcana la cealalta coloana.
+
+
