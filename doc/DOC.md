@@ -37,7 +37,7 @@ si va compila sursele, dupa care va rula aplicatia.
 
 Pe langa aplicatia propriu zisa, este nevoie si de un directoriu aflat pe locatia HOME, ( `C:\users\[utilizator\` pentru 
 windows sau `/home/[utilizator]/` pentru orice sistem Unix-like ), din care se vor citi toate lucrurile legate de 
-aplicatie, precum conturile, lectiile, materialele lectilor, etc.
+aplicatie, precum conturile, lectiile, materialele lectilor, etc sub numele "lectii-mod".
 
 Directoriul lectii-mod este un "template" care contine teste anterioare date, conturi dummy si materiale. 
 Un .jar compilat deja se afla si el in repositoriu, lectii-mod.jar.
