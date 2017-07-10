@@ -8,7 +8,7 @@ imediat dupa ce au fost date, si se noteaza.
 Acesta este scris in Scala ( un limbaj care lucreaza pe JVM, ca si Java, Groovy, Kotlin, etc ) si foloseste scala.swing, 
 un wrapper pentru libraria swing din Java. Foloseste Gradle ca si build tool.
 
-# Instalare # 
+# Instalare #
 
 Dependente: 
 
@@ -78,7 +78,7 @@ modificata, pentru a permite identificarea si construirea URL-ului local, astfel
 <{img="imagine" [orice alte optiuni]>
 ```
 
-# Despre Teste # 
+# Despre Teste #
 
 Un test poate avea trei "grupe" de exercitii:
     
