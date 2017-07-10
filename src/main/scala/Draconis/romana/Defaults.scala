@@ -26,7 +26,7 @@ object Defaults {
     val r_radioLabelProfessor: String = "Profesor"
     val r_creationButtonLabel: String = "Creare"
     val r_quitButtonLabel: String = "Inapoi"
-    val r_unallowedChars: String = "[^a-zA-Z0-9]"
+    val r_unallowedChars: String = "[#]"
     val r_invalidTokenMessage: String = "Artefact invalid."
     val r_invalidData: String = "Eroare date introduse."
     val r_userConflictMessage: String = "Utilizatorul deja exista."
