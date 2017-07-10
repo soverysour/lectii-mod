@@ -95,8 +95,8 @@ object Defaults {
 
   object Paths {
     private[this] val delimiter: String = {
-      if (System.getProperty("os.name").toLowerCase.contains("linux")) "/"
-      else "\\"
+      if (System.getProperty("os.name").toLowerCase.contains("windows")) "\\"
+      else "/"
     }
 
     val homePath: String = s"${System.getProperty("user.home")}${delimiter}lectii-mod${delimiter}"
